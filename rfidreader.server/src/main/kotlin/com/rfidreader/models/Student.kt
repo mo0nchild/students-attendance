@@ -7,9 +7,13 @@ import jakarta.persistence.*
 data class Student (
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val Id: Long,
-    val Name: String,
-    val Surname: String,
-    val Patronymic: String,
-    val RfidCode: String
+    val id: Long,
+    val name: String,
+    val surname: String,
+    val patronymic: String,
+    val rfidCode: String,
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "group_id", nullable = false)
+    val group: Group
 )
