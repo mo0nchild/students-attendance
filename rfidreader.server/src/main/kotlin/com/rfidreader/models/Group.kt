@@ -4,12 +4,14 @@ import jakarta.persistence.*
 
 @Suppress("JpaObjectClassSignatureInspection")
 @Entity
+@Table(name = "Groups")
 data class Group (
-    @Id @GeneratedValue
-    val id: Long,
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    val id: Long? = null,
     val name: String,
     val faculty: String,
 
-    @OneToMany(mappedBy = "group", cascade = [CascadeType.ALL])
-    val students: List<Student> = emptyList(),
+    @OneToMany(mappedBy = "group", cascade = [CascadeType.ALL], orphanRemoval = true)
+    val students: MutableList<Student> = mutableListOf(),
 )

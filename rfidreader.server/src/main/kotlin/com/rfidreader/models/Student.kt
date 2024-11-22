@@ -4,16 +4,17 @@ import jakarta.persistence.*
 
 @Suppress("JpaObjectClassSignatureInspection")
 @Entity
+@Table(name = "Students")
 data class Student (
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Long,
+    val id: Long? = null,
     val name: String,
     val surname: String,
     val patronymic: String,
     val rfidCode: String,
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "group_id", nullable = false)
-    val group: Group
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "group_id")
+    val group: Group? = null
 )

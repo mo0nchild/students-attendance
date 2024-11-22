@@ -6,10 +6,11 @@ import java.sql.Timestamp
 
 @Suppress("JpaObjectClassSignatureInspection")
 @Entity
+@Table(name = "Attendances")
 data class Attendance (
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val Id: Long,
+    val id: Long,
     val status: String,
     val time: Timestamp
 )
