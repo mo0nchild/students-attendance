@@ -14,13 +14,10 @@ data class Attendance (
     val time: Timestamp,
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "discipline_id")
-    val discipline: Discipline? = null,
+    @JoinColumn(name = "student_id")
+    val student: Student? = null,
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "lesson_id")
     val lesson: Lesson? = null,
-
-    @ManyToMany(mappedBy = "attendance_id", cascade = [CascadeType.ALL])
-    val lessonGroups: MutableList<LessonGroup> = mutableListOf()
 )

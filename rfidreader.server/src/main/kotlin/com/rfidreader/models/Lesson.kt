@@ -17,6 +17,9 @@ data class Lesson (
     @JoinColumn(name = "discipline_id")
     val discipline: Discipline? = null,
 
-    @OneToMany(mappedBy = "Lesson", cascade = [CascadeType.ALL], orphanRemoval = true)
-    val attendances: MutableList<Attendance> = mutableListOf()
+    @OneToMany(mappedBy = "lesson", cascade = [CascadeType.ALL], orphanRemoval = true)
+    val attendances: MutableList<Attendance> = mutableListOf(),
+
+    @ManyToMany(mappedBy = "lessons", cascade = [CascadeType.ALL])
+    val groups: MutableList<Group> = mutableListOf()
 )
