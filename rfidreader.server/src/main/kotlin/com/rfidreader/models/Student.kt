@@ -16,5 +16,5 @@ data class Student (
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "group_id")
-    val group: Group? = null
+    var group: Group? = null
 )

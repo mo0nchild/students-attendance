@@ -5,7 +5,7 @@ import org.mapstruct.Mapper
 import org.mapstruct.factory.Mappers
 
 data class StudentDto(
-    var id: Long,
+    var id: Long? = null,
     val name: String,
     val surname: String,
     val patronymic: String,
