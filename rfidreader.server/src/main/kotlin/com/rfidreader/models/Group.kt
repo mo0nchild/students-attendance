@@ -14,4 +14,7 @@ data class Group (
 
     @OneToMany(mappedBy = "group", cascade = [CascadeType.ALL], orphanRemoval = true)
     val students: MutableList<Student> = mutableListOf(),
+
+    @ManyToMany(mappedBy = "group", cascade = [CascadeType.ALL])
+    val lessonGroups: MutableList<LessonGroup> = mutableListOf()
 )
