@@ -8,6 +8,10 @@ import jakarta.persistence.*
 data class Discipline (
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Long,
-    val name: String
+    val id: Long? = null,
+    val name: String,
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "lecturer_id")
+    val lecturer: Lecturer? = null,
 )

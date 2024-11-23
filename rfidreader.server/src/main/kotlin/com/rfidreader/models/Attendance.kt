@@ -13,4 +13,6 @@ data class Attendance (
     val id: Long,
     val status: String,
     val time: Timestamp
+
+    val
 )
