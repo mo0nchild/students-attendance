@@ -12,7 +12,9 @@ data class Attendance (
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long,
     val status: String,
-    val time: Timestamp
+    val time: Timestamp,
 
-    val
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "discipline_id")
+    val discipline: Discipline? = null
 )

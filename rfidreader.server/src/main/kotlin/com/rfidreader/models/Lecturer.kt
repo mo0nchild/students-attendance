@@ -14,5 +14,5 @@ data class Lecturer (
     val patronymic: String,
 
     @OneToMany(mappedBy = "lecturer", cascade = [CascadeType.ALL], orphanRemoval = true)
-    val disciplines: MutableList<Discipline> = mutableListOf(),
+    val disciplines: MutableList<Discipline> = mutableListOf()
 )
