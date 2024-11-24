@@ -1,21 +1,23 @@
-package com.rfidreader.services.students.mappers
+package com.rfidreader.services.students.models
 
-import com.rfidreader.models.Group
+import com.rfidreader.models.Attendance
 import com.rfidreader.models.Student
-import com.rfidreader.services.students.models.GroupDto
-import com.rfidreader.services.students.models.NewStudent
-import com.rfidreader.services.students.models.StudentDto
+import com.rfidreader.services.groups.models.GroupMapper
 import org.mapstruct.Mapper
 import org.mapstruct.Mapping
 import org.mapstruct.MappingConstants
 import org.mapstruct.Mappings
+import org.mapstruct.Named
+import org.mapstruct.NullValueMappingStrategy
+import org.mapstruct.NullValuePropertyMappingStrategy
 import org.mapstruct.ReportingPolicy
 import org.mapstruct.factory.Mappers
 
 @Mapper(
     componentModel = MappingConstants.ComponentModel.DEFAULT,
     uses = [GroupMapper::class],
-    unmappedTargetPolicy = ReportingPolicy.IGNORE
+    unmappedTargetPolicy = ReportingPolicy.IGNORE,
+    nullValueMappingStrategy = NullValueMappingStrategy.RETURN_DEFAULT,
 )
 interface StudentMapper {
     @Mappings(
@@ -23,6 +25,10 @@ interface StudentMapper {
         Mapping(target = "group", source = "group"),
     )
     fun toStudentDto(student: Student): StudentDto
+    @Mappings(
+        Mapping(target = "id", ignore = true),
+        Mapping(source = "groupId", target = "attendances", ignore = true),
+    )
     fun toStudentEntity(studentDto: NewStudent): Student
 
     companion object {

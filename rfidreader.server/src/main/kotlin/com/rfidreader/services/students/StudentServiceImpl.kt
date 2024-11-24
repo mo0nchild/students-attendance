@@ -1,48 +1,33 @@
 package com.rfidreader.services.students
 
-import com.rfidreader.infrastructures.Results
-import com.rfidreader.repositories.GroupRepository
+import com.rfidreader.infrastructures.exceptions.ProcessException
 import com.rfidreader.repositories.StudentRepository
-import com.rfidreader.services.students.mappers.GroupMapper
-import com.rfidreader.services.students.mappers.StudentMapper
-import com.rfidreader.services.students.models.GroupDto
-import com.rfidreader.services.students.models.NewGroup
 import com.rfidreader.services.students.models.NewStudent
 import com.rfidreader.services.students.models.StudentDto
+import com.rfidreader.services.students.models.StudentMapper
+import jakarta.validation.Validator
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 class StudentServiceImpl(
     private val studentRepository: StudentRepository,
-    private val groupRepository: GroupRepository,
+    private val validator: Validator
 ) : StudentService {
     private val studentMapper = StudentMapper.INSTANCE
-    private val groupMapper = GroupMapper.INSTANCE
 
+    @Transactional
     override fun addStudent(newStudent: NewStudent): Unit {
-        val entity = studentMapper.toStudentEntity(newStudent)
-        entity.group = (groupRepository.findById(newStudent.groupId).let {
-            when(it.isEmpty) {
-                false -> it.get()
-                true -> null
-            }
-        } ?: throw Exception("Group not found"))
-        studentRepository.save(entity)
-    }
-    override fun deleteStudentById(id: Long) {
-        try { studentRepository.deleteById(id) }
-        catch (error: Exception) {
-            throw Exception(error.message)
+        validator.validate(newStudent).let {
+            if(it.isNotEmpty()) throw ProcessException(it.first().message)
         }
+        var entity = studentMapper.toStudentEntity(newStudent)
+        studentRepository.saveWithGroup(entity, newStudent.groupId)
     }
-    override fun addGroup(newGroup: NewGroup) {
-        groupRepository.save(groupMapper.toGroupEntity(newGroup))
-    }
-    override fun deleteGroup(id: Long) {
-        groupRepository.deleteById(id)
-    }
-    override fun getAllGroups(): List<GroupDto> {
-        return groupRepository.findAll().map { groupMapper.toGroupDto(it) }
+    @Transactional
+    override fun deleteStudentById(id: Long) {
+        val entity = studentRepository.findById(id).orElseThrow { ProcessException("Student not found") }
+        studentRepository.delete(entity)
     }
     override fun getStudentsByGroupId(groupId: Long): List<StudentDto> {
         return studentRepository.getStudentByGroupId(groupId).map { studentMapper.toStudentDto(it) }
@@ -51,6 +36,7 @@ class StudentServiceImpl(
         return studentRepository.findAll().map { studentMapper.toStudentDto(it) }
     }
     override fun getStudentById(id: Long): StudentDto {
-        return studentRepository.findById(id).map { studentMapper.toStudentDto(it) }.orElseThrow()
+        return studentRepository.findById(id).map { studentMapper.toStudentDto(it) }
+            .orElseThrow({ ProcessException("Student not found") })
     }
 }

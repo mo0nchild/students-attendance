@@ -1,8 +1,9 @@
 package com.rfidreader.services.students.models
 
-import com.rfidreader.models.Student
-import org.mapstruct.Mapper
-import org.mapstruct.factory.Mappers
+import com.rfidreader.services.groups.models.GroupDto
+import jakarta.validation.constraints.NotEmpty
+import jakarta.validation.constraints.NotNull
+import jakarta.validation.constraints.Size
 
 data class StudentDto(
     var id: Long? = null,
@@ -14,9 +15,22 @@ data class StudentDto(
 )
 
 data class NewStudent(
+    @field:Size(min=3, max=50)
+    @field:NotNull
+    @field:NotEmpty
     val name: String,
+
+    @field:Size(min=3, max=50)
+    @field:NotNull
+    @field:NotEmpty
     val surname: String,
+
+    @field:Size(min=3, max=50)
+    @field:NotNull
+    @field:NotEmpty
     val patronymic: String,
+
+    @field:NotNull
     val rfidCode: String,
     val groupId: Long
 )

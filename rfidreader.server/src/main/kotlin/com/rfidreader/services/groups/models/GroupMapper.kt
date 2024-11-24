@@ -1,8 +1,6 @@
-package com.rfidreader.services.students.mappers
+package com.rfidreader.services.groups.models
 
 import com.rfidreader.models.Group
-import com.rfidreader.services.students.models.GroupDto
-import com.rfidreader.services.students.models.NewGroup
 import org.mapstruct.Mapper
 import org.mapstruct.Mapping
 import org.mapstruct.MappingConstants

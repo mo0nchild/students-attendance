@@ -8,11 +8,11 @@ import jakarta.persistence.*
 data class Lecturer (
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id : Long,
+    val id: Long? = null,
     val name: String,
     val surname: String,
-    val patronymic: String,
-
+    val patronymic: String
+) {
     @OneToMany(mappedBy = "lecturer", cascade = [CascadeType.ALL], orphanRemoval = true)
-    val disciplines: MutableList<Discipline> = mutableListOf()
-)
+    var disciplines: MutableList<Discipline> = mutableListOf()
+}

@@ -10,14 +10,14 @@ import java.sql.Timestamp
 data class Attendance (
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Long,
+    val id: Long? = null,
     val time: Timestamp,
-
+) {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "student_id")
-    val student: Student? = null,
+    var student: Student? = null
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "lesson_id")
-    val lesson: Lesson? = null,
-)
+    var lesson: Lesson? = null
+}

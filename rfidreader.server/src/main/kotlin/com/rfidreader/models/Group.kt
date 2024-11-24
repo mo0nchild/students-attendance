@@ -11,11 +11,10 @@ data class Group (
     val id: Long? = null,
     val name: String,
     val faculty: String,
-
+) {
     @OneToMany(mappedBy = "group", cascade = [CascadeType.ALL], orphanRemoval = true)
-    val students: MutableList<Student> = mutableListOf(),
+    var students: MutableList<Student> = mutableListOf()
 
     @ManyToMany(cascade = [CascadeType.ALL])
-    val lessons: MutableList<Lesson> = mutableListOf()
-
-)
+    var lessons: MutableList<Lesson> = mutableListOf()
+}

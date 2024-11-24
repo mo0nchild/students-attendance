@@ -13,11 +13,11 @@ data class Student (
     val surname: String,
     val patronymic: String,
     val rfidCode: String,
-
+) {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "group_id")
-    var group: Group? = null,
+    var group: Group? = null
 
     @OneToMany(mappedBy = "student", cascade = [CascadeType.ALL])
-    val attendances: MutableList<Attendance> = mutableListOf(),
-)
+    var attendances: MutableList<Attendance> = mutableListOf()
+}

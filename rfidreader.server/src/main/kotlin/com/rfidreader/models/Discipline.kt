@@ -8,13 +8,13 @@ import jakarta.persistence.*
 data class Discipline (
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Long,
+    val id: Long? = null,
     val name: String,
-
+) {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "lecturer_id")
-    val lecturer: Lecturer? = null,
+    var lecturer: Lecturer? = null
 
     @OneToMany(mappedBy = "discipline", cascade = [CascadeType.ALL], orphanRemoval = true)
-    val lessons: MutableList<Lesson> = mutableListOf()
-)
+    var lessons: MutableList<Lesson> = mutableListOf()
+}
