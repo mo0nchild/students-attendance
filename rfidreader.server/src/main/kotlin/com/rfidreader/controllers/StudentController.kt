@@ -27,8 +27,8 @@ class StudentController(private val studentService: StudentServiceImpl) {
     fun getStudentById(@PathVariable id: Long): ResponseEntity<StudentDto> {
         return ResponseEntity.ok(studentService.getStudentById(id))
     }
-    @GetMapping("/get/group/{id}")
-    fun getStudentByGroupId(@PathVariable id: Long): ResponseEntity<List<StudentDto>> {
+    @GetMapping("/getAll/group/{id}")
+    fun getStudentsByGroupId(@PathVariable id: Long): ResponseEntity<List<StudentDto>> {
         return ResponseEntity.ok(studentService.getStudentsByGroupId(id))
     }
 }
