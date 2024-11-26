@@ -21,7 +21,10 @@ class StudentServiceImpl(
         validator.validate(newStudent).let {
             if(it.isNotEmpty()) throw ProcessException(it.first().message)
         }
-        var entity = studentMapper.toStudentEntity(newStudent)
+        studentRepository.getStudentsByRfidCode(newStudent.rfidCode).let {
+            if(it.isNotEmpty()) throw ProcessException("RfidCode already exists")
+        }
+        val entity = studentMapper.toStudentEntity(newStudent)
         studentRepository.saveWithGroup(entity, newStudent.groupId)
     }
     @Transactional

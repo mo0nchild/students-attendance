@@ -1,31 +1,59 @@
 package com.rfidreader.services.attendance
 
 import com.rfidreader.infrastructures.exceptions.ProcessException
+import com.rfidreader.models.Attendance
 import com.rfidreader.repositories.AttendanceRepository
+import com.rfidreader.repositories.LessonRepository
+import com.rfidreader.repositories.StudentRepository
 import com.rfidreader.services.attendance.models.AttendanceDto
 import com.rfidreader.services.attendance.models.AttendanceMapper
 import com.rfidreader.services.attendance.models.NewAttendances
 import jakarta.validation.Validator
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.sql.Timestamp
+import java.time.LocalDateTime
 
+@Service
 open class AttendanceServiceImpl(
-    private val repository: AttendanceRepository,
+    private val attendanceRepository: AttendanceRepository,
     private val validator: Validator
 ) : AttendanceService {
     private val mapper = AttendanceMapper.INSTANCE
+
+    @Autowired
+    private lateinit var studentRepository: StudentRepository
+    @Autowired
+    private lateinit var lessonRepository: LessonRepository
 
     @Transactional
     override fun addAttendances(attendances: NewAttendances) {
         validator.validate(attendances).let {
             if (it.isNotEmpty()) throw ProcessException(it.first().message)
         }
-        val students =
-
+        val newAttendances: MutableList<Attendance> = mutableListOf()
+        val lesson = lessonRepository.findById(attendances.lessonId).let {
+            if (it.isPresent) it.get() else throw ProcessException("Lesson not found")
+        }
+        for (item in attendances.rfidCodes) {
+            studentRepository.getStudentsByRfidCode(item).forEach {
+                newAttendances.add(Attendance(time = Timestamp.valueOf(LocalDateTime.now())).apply {
+                    this.lesson = lesson
+                    this.student = it
+                })
+            }
+        }
+        attendanceRepository.saveAll(newAttendances)
     }
-    override fun removeAttendance(rfidCode: String) {
-        TODO("Not yet implemented")
+    override fun removeAttendance(rfidCode: String, lessonId: Long) {
+        attendanceRepository.deleteAll(attendanceRepository.getAttendanceByLesson(lessonId).filter {
+            it.student?.rfidCode == rfidCode
+        }.let {
+            it.ifEmpty { throw ProcessException("Not found") }
+        })
     }
     override fun getAttendancesByLesson(lessonId: Long): List<AttendanceDto> {
-        TODO("Not yet implemented")
+        return attendanceRepository.getAttendanceByLesson(lessonId).map { mapper.toAttendanceDto(it) }
     }
 }

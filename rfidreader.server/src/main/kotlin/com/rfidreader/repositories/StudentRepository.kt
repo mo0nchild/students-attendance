@@ -12,4 +12,7 @@ interface StudentRepository : JpaRepository<Student, Long>, StudentCustomReposit
     
     @Query("SELECT s FROM Student s WHERE s.group.id = :groupId ")
     fun getStudentByGroupId(@Param("groupId") groupId: Long): List<Student>
+
+    @Query("SELECT s FROM Student s WHERE s.rfidCode = :rfidCode")
+    fun getStudentsByRfidCode(@Param("rfidCode") rfidCode: String): List<Student>
 }
