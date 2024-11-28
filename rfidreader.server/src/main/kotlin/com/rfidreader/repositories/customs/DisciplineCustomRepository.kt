@@ -22,7 +22,7 @@ open class DisciplineRepositoryImpl : DisciplineCustomRepository {
     override fun saveWithLecture(discipline: Discipline, lecturerId: Long) {
         if(discipline.lecturer == null) {
             discipline.lecturer = entityManager.find(Lecturer::class.java, lecturerId)
-                ?: throw ProcessException("Group not found")
+                ?: throw ProcessException("Lecturer not found")
         }
         entityManager.persist(discipline)
         entityManager.flush()

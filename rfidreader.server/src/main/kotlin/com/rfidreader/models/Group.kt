@@ -15,6 +15,6 @@ data class Group (
     @OneToMany(mappedBy = "group", cascade = [CascadeType.ALL], orphanRemoval = true)
     var students: MutableList<Student> = mutableListOf()
 
-    @ManyToMany(cascade = [CascadeType.ALL])
+    @ManyToMany(cascade = [CascadeType.ALL], fetch = FetchType.EAGER)
     var lessons: MutableList<Lesson> = mutableListOf()
 }

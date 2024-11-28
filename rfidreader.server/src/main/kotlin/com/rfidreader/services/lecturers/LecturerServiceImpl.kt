@@ -24,6 +24,7 @@ class LecturerServiceImpl(
         }
         lecturerRepository.save(lecturerMapper.toLecturerEntity(newLecturer))
     }
+    @Transactional
     override fun deleteLecturer(id: Long) {
         val entity = lecturerRepository.findById(id).orElseThrow { ProcessException("Lecturer not found") }
         lecturerRepository.delete(entity)

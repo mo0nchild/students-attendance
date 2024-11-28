@@ -25,12 +25,14 @@ data class NewStudent(
     @field:NotEmpty
     val surname: String,
 
-    @field:Size(min=3, max=50)
+    @field:Size(min =3, max=50)
     @field:NotNull
     @field:NotEmpty
     val patronymic: String,
 
     @field:NotNull
+    @field:NotEmpty
     val rfidCode: String,
+    @field:NotNull
     val groupId: Long
 )

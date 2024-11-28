@@ -21,11 +21,15 @@ class DisciplineServiceImpl(
         validator.validate(newDiscipline).let {
             if(it.isNotEmpty()) throw ProcessException(it.first().message)
         }
+        repository.getDisciplinesByName(newDiscipline.name).let {
+            if(it.isNotEmpty()) throw ProcessException("Discipline already exists")
+        }
         val entity = mapper.toDisciplineEntity(newDiscipline)
         repository.saveWithLecture(entity, newDiscipline.lecturerId)
     }
+    @Transactional
     override fun removeDiscipline(id: Long) {
-        val entity = repository.findById(id).orElseThrow { ProcessException("Group not found") }
+        val entity = repository.findById(id).orElseThrow { ProcessException("Discipline not found") }
         repository.delete(entity)
     }
     override fun getAllDisciplines(): List<DisciplineDto> {

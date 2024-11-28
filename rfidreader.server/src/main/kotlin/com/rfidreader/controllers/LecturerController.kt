@@ -4,6 +4,7 @@ import com.rfidreader.services.lecturers.LecturerService
 import com.rfidreader.services.lecturers.models.LecturerDto
 import com.rfidreader.services.lecturers.models.NewLecturer
 import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
@@ -23,7 +24,7 @@ class LecturerController(private val lecturerService: LecturerService) {
         lecturerService.addLecturer(newLecturer)
         return ResponseEntity.ok("Lecturer successfully added")
     }
-    @GetMapping("/remove/{id}")
+    @DeleteMapping("/remove/{id}")
     fun removeLecturer(@PathVariable id: Long): ResponseEntity<String> {
         lecturerService.deleteLecturer(id)
         return ResponseEntity.ok("Lecturer successfully removed")

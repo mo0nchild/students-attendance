@@ -99,8 +99,8 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-actuator</artifactId>
 		</dependency>
-	</dependencies>
 
+	</dependencies>
 	<build>
 		<sourceDirectory>${project.basedir}/src/main/kotlin</sourceDirectory>
 		<testSourceDirectory>${project.basedir}/src/test/kotlin</testSourceDirectory>
@@ -134,9 +134,6 @@
 							<goal>kapt</goal>
 						</goals>
 						<configuration>
-							<sourceDirs>
-								<sourceDir>src/main/kotlin</sourceDir>
-							</sourceDirs>
 							<annotationProcessorPaths>
 								<annotationProcessorPath>
 									<groupId>org.mapstruct</groupId>

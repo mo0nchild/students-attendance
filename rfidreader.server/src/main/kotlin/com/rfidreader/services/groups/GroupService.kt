@@ -8,4 +8,5 @@ interface GroupService {
     fun deleteGroup(id: Long): Unit
 
     fun getAllGroups(): List<GroupDto>
+    fun getGroupsByFaculty(faculty: String): List<GroupDto>
 }

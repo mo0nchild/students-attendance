@@ -21,6 +21,7 @@ class StudentController(private val studentService: StudentServiceImpl) {
     }
     @DeleteMapping("/remove/{id}")
     fun removeStudent(@PathVariable id: Long): ResponseEntity<String> {
+        studentService.deleteStudentById(id)
         return ResponseEntity.ok("Student successfully removed")
     }
     @GetMapping("/get/{id}")

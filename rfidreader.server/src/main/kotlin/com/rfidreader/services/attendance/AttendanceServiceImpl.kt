@@ -37,8 +37,8 @@ open class AttendanceServiceImpl(
             if (it.isPresent) it.get() else throw ProcessException("Lesson not found")
         }
         for (item in attendances.rfidCodes) {
-            studentRepository.getStudentsByRfidCode(item).forEach {
-                newAttendances.add(Attendance(time = Timestamp.valueOf(LocalDateTime.now())).apply {
+            studentRepository.getStudentsByRfidCode(item.code).forEach {
+                newAttendances.add(Attendance(time = item.time).apply {
                     this.lesson = lesson
                     this.student = it
                 })
@@ -46,6 +46,7 @@ open class AttendanceServiceImpl(
         }
         attendanceRepository.saveAll(newAttendances)
     }
+    @Transactional
     override fun removeAttendance(rfidCode: String, lessonId: Long) {
         attendanceRepository.deleteAll(attendanceRepository.getAttendanceByLesson(lessonId).filter {
             it.student?.rfidCode == rfidCode

@@ -14,7 +14,6 @@ interface DisciplineMapper {
     )
     fun toDisciplineDto(discipline: Discipline): DisciplineDto
     @Mappings(
-        Mapping(target = "id", source = "id"),
         Mapping(target = "lecturer", ignore = true),
         Mapping(target = "lessons", ignore = true)
     )

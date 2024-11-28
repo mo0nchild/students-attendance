@@ -22,7 +22,7 @@ interface LecturerMapper {
     )
     fun toLecturerEntity(lecturerDto: NewLecturer): Lecturer
     @Mappings(
-        Mapping(target = "id", ignore = true)
+        Mapping(target = "id", source = "id")
     )
     fun toLecturerDto(lecturer: Lecturer): LecturerDto
 

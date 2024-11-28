@@ -30,4 +30,8 @@ class GroupController(private val groupService: GroupService) {
         groupService.deleteGroup(id)
         return ResponseEntity.ok("Group successfully deleted")
     }
+    @GetMapping("getAll/faculty/{name}")
+    fun getGroupsByFaculty(@PathVariable("name") name: String): ResponseEntity<List<GroupDto>> {
+        return ResponseEntity.ok(groupService.getGroupsByFaculty(name))
+    }
 }

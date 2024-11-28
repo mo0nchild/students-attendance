@@ -2,6 +2,7 @@ package com.rfidreader.models
 
 import jakarta.persistence.*
 import java.sql.Timestamp
+import java.time.LocalDateTime
 
 @Suppress("JpaObjectClassSignatureInspection")
 @Entity
@@ -10,7 +11,7 @@ data class Lesson (
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long? = null,
-    val time: Timestamp,
+    val time: LocalDateTime = LocalDateTime.now(),
     val theme: String,
 ) {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -20,6 +21,6 @@ data class Lesson (
     @OneToMany(mappedBy = "lesson", cascade = [CascadeType.ALL], orphanRemoval = true)
     var attendances: MutableList<Attendance> = mutableListOf()
 
-    @ManyToMany(mappedBy = "lessons", cascade = [CascadeType.ALL])
+    @ManyToMany(mappedBy = "lessons", fetch = FetchType.EAGER)
     var groups: MutableList<Group> = mutableListOf()
 }
