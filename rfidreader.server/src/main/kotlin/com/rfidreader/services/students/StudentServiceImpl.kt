@@ -40,6 +40,6 @@ class StudentServiceImpl(
     }
     override fun getStudentById(id: Long): StudentDto {
         return studentRepository.findById(id).map { studentMapper.toStudentDto(it) }
-            .orElseThrow({ ProcessException("Student not found") })
+            .orElseThrow { ProcessException("Student not found") }
     }
 }

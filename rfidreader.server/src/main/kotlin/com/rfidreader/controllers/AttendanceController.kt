@@ -23,5 +23,4 @@ class AttendanceController(private val attendanceService: AttendanceService) {
         attendanceService.removeAttendance(rfid, lessonId)
         return ResponseEntity.ok("Attendance successfully removed")
     }
-
 }

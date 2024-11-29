@@ -37,6 +37,7 @@ open class AttendanceServiceImpl(
             if (it.isPresent) it.get() else throw ProcessException("Lesson not found")
         }
         for (item in attendances.rfidCodes) {
+            if(attendanceRepository.checkExists(item.code, lesson.id!!).isPresent) continue
             studentRepository.getStudentsByRfidCode(item.code).forEach {
                 newAttendances.add(Attendance(time = item.time).apply {
                     this.lesson = lesson

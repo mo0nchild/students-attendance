@@ -3,10 +3,8 @@ package com.rfidreader.controllers
 import com.rfidreader.services.lessons.LessonService
 import com.rfidreader.services.lessons.models.LessonDto
 import com.rfidreader.services.lessons.models.NewLesson
-import jakarta.validation.Valid
+import com.rfidreader.services.lessons.models.StudentOnLesson
 import org.springframework.http.ResponseEntity
-import org.springframework.validation.BindingResult
-import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -31,5 +29,9 @@ class LessonController(private val lessonService: LessonService) {
     fun removeLesson(@PathVariable("id") id: Long): ResponseEntity<String> {
         lessonService.deleteLesson(id)
         return ResponseEntity.ok("Lesson successfully removed")
+    }
+    @GetMapping("/getInfo/{id}")
+    fun getStudentsOnLesson(@PathVariable("id") id: Long): ResponseEntity<List<StudentOnLesson>> {
+        return ResponseEntity.ok(lessonService.getStudentsOnLesson(id))
     }
 }

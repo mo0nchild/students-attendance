@@ -6,6 +6,7 @@ import com.rfidreader.models.Group
 import com.rfidreader.models.Lesson
 import jakarta.persistence.EntityManager
 import jakarta.persistence.PersistenceContext
+import jakarta.persistence.criteria.JoinType
 import org.springframework.stereotype.Repository
 import org.springframework.transaction.annotation.Transactional
 
@@ -39,5 +40,4 @@ class LessonCustomRepositoryImpl : LessonCustomRepository {
         entityManager.persist(entity)
         entityManager.flush()
     }
-
 }
