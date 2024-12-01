@@ -3,6 +3,7 @@ package com.rfidreader.controllers
 import com.rfidreader.services.disciplines.DisciplineService
 import com.rfidreader.services.disciplines.models.DisciplineDto
 import com.rfidreader.services.disciplines.models.NewDiscipline
+import com.rfidreader.services.disciplines.models.UpdateDiscipline
 import com.rfidreader.services.groups.models.GroupDto
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -17,6 +18,11 @@ class DisciplineController(private val disciplineService: DisciplineService) {
     @GetMapping("/getAll/lecturer/{id}")
     fun getAllDisciplinesByLecturerId(@PathVariable id: Long): ResponseEntity<List<DisciplineDto>> {
         return ResponseEntity.ok(disciplineService.getDisciplineByLecturer(id))
+    }
+    @PutMapping("/update")
+    fun updateDiscipline(@RequestBody discipline: UpdateDiscipline): ResponseEntity<String> {
+        disciplineService.updateDiscipline(discipline)
+        return ResponseEntity.ok("Discipline successfully updated")
     }
     @PostMapping("/add")
     fun addDiscipline(@RequestBody newDiscipline: NewDiscipline): ResponseEntity<String> {

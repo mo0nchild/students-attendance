@@ -9,9 +9,9 @@ data class Lecturer (
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long? = null,
-    val name: String,
-    val surname: String,
-    val patronymic: String
+    var name: String,
+    var surname: String,
+    var patronymic: String
 ) {
     @OneToMany(mappedBy = "lecturer", cascade = [CascadeType.ALL], orphanRemoval = true)
     var disciplines: MutableList<Discipline> = mutableListOf()

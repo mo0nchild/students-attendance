@@ -5,6 +5,7 @@ import com.rfidreader.repositories.GroupRepository
 import com.rfidreader.services.groups.models.GroupDto
 import com.rfidreader.services.groups.models.GroupMapper
 import com.rfidreader.services.groups.models.NewGroup
+import com.rfidreader.services.groups.models.UpdateGroup
 import jakarta.validation.Validator
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -30,6 +31,18 @@ class GroupServiceImpl(
     override fun deleteGroup(id: Long) {
         val entity = groupRepository.findById(id).orElseThrow { ProcessException("Group not found") }
         groupRepository.delete(entity)
+    }
+    @Transactional
+    override fun updateGroup(group: UpdateGroup) {
+        validator.validate(group).let {
+            if(it.isNotEmpty()) throw ProcessException(it.first().message)
+        }
+        val entity = groupRepository.findById(group.id).orElseThrow { ProcessException("Group not found") }
+            .also {
+                it.name = group.name
+                it.faculty = group.faculty
+            }
+        groupRepository.save(entity)
     }
     override fun getAllGroups(): List<GroupDto> {
         return groupRepository.findAll().map { groupMapper.toGroupDto(it) }

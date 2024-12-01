@@ -2,6 +2,8 @@ package com.rfidreader.services.lessons
 
 import com.rfidreader.infrastructures.exceptions.ProcessException
 import com.rfidreader.repositories.AttendanceRepository
+import com.rfidreader.repositories.DisciplineRepository
+import com.rfidreader.repositories.GroupRepository
 import com.rfidreader.repositories.LessonRepository
 import com.rfidreader.repositories.customs.LessonCustomRepository
 import com.rfidreader.services.attendance.AttendanceService
@@ -10,6 +12,7 @@ import com.rfidreader.services.lessons.models.LessonDto
 import com.rfidreader.services.lessons.models.LessonMapper
 import com.rfidreader.services.lessons.models.NewLesson
 import com.rfidreader.services.lessons.models.StudentOnLesson
+import com.rfidreader.services.lessons.models.UpdateLesson
 import com.rfidreader.services.students.StudentService
 import com.rfidreader.services.students.models.StudentMapper
 import jakarta.validation.Validator
@@ -25,7 +28,10 @@ open class LessonServiceImpl(
     private val mapper = LessonMapper.INSTANCE
     @Autowired
     private lateinit var studentService: StudentService
-
+    @Autowired
+    private lateinit var groupRepository: GroupRepository
+    @Autowired
+    private lateinit var disciplineRepository: DisciplineRepository
     @Transactional
     override fun addLesson(newLesson: NewLesson) {
         validator.validate(newLesson).let {
@@ -43,6 +49,27 @@ open class LessonServiceImpl(
     override fun deleteLesson(id: Long) {
         val entity = lessonRepository.findById(id).orElseThrow { ProcessException("Lesson not found") }
         lessonRepository.delete(entity)
+    }
+    @Transactional
+    override fun updateLesson(lesson: UpdateLesson) {
+        validator.validate(lesson).let {
+            if (it.isNotEmpty()) throw ProcessException(it.first().message)
+        }
+        val entity = lessonRepository.findById(lesson.id).orElseThrow { ProcessException("Lesson not found") }
+            .also {
+                it.time = lesson.time
+                it.theme = lesson.theme
+                it.discipline = disciplineRepository.findById(lesson.disciplineId)
+                    .orElseThrow { ProcessException("Discipline not found") }
+            }
+        entity.groups.forEach { it.lessons.remove(entity) }
+        lesson.groupIds.forEach {
+            val group = groupRepository.findById(it).orElseThrow { ProcessException("Group id=$it not found") }
+                .let { it.lessons.add(entity); it }
+            groupRepository.save(group)
+
+        }
+        lessonRepository.save(entity)
     }
     override fun getLessonsByDiscipline(id: Long): List<LessonDto> {
         return lessonRepository.getLessonsByDiscipline(id).map { mapper.toLessonDto(it) }

@@ -14,6 +14,29 @@ data class StudentDto(
     val group: GroupDto
 )
 
+data class UpdateStudent(
+    @field:NotNull
+    val id: Long,
+
+    @field:Size(min=3, max=50)
+    @field:NotNull
+    @field:NotEmpty
+    val name: String,
+
+    @field:Size(min=3, max=50)
+    @field:NotNull
+    @field:NotEmpty
+    val surname: String,
+
+    @field:Size(min=3, max=50)
+    @field:NotNull
+    @field:NotEmpty
+    val patronymic: String,
+
+    @field:NotNull
+    val groupId: Long
+)
+
 data class NewStudent(
     @field:Size(min=3, max=50)
     @field:NotNull

@@ -55,6 +55,12 @@ open class AttendanceServiceImpl(
             it.ifEmpty { throw ProcessException("Not found") }
         })
     }
+    @Transactional
+    override fun removeAllAttendance(lessonId: Long) {
+        attendanceRepository.deleteAll(attendanceRepository.getAttendanceByLesson(lessonId).let {
+            it.ifEmpty { throw ProcessException("Not found") }
+        })
+    }
     override fun getAttendancesByLesson(lessonId: Long): List<AttendanceDto> {
         return attendanceRepository.getAttendanceByLesson(lessonId).map { mapper.toAttendanceDto(it) }
     }

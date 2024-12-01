@@ -11,8 +11,8 @@ data class Lesson (
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long? = null,
-    val time: LocalDateTime = LocalDateTime.now(),
-    val theme: String,
+    var time: LocalDateTime = LocalDateTime.now(),
+    var theme: String,
 ) {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "discipline_id")

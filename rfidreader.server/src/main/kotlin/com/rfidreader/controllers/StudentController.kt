@@ -3,6 +3,7 @@ package com.rfidreader.controllers
 import com.rfidreader.services.students.StudentServiceImpl
 import com.rfidreader.services.students.models.NewStudent
 import com.rfidreader.services.students.models.StudentDto
+import com.rfidreader.services.students.models.UpdateStudent
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
@@ -23,6 +24,11 @@ class StudentController(private val studentService: StudentServiceImpl) {
     fun removeStudent(@PathVariable id: Long): ResponseEntity<String> {
         studentService.deleteStudentById(id)
         return ResponseEntity.ok("Student successfully removed")
+    }
+    @PutMapping("/update")
+    fun updateStudent(@RequestBody student: UpdateStudent): ResponseEntity<String> {
+        studentService.updateStudent(student)
+        return ResponseEntity.ok("Student successfully updated")
     }
     @GetMapping("/get/{id}")
     fun getStudentById(@PathVariable id: Long): ResponseEntity<StudentDto> {

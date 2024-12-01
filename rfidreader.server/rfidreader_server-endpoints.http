@@ -1,0 +1,263 @@
+@apiKey=73e259e9-afb3-490b-ace1-b19c31bec8a5
+@host=localhost:8080
+
+###
+POST http://{{host}}/api/group/add
+Content-Type: application/json
+API-KEY: {{apiKey}}
+
+{
+  "name": "бОИС-221",
+  "faculty": "ФИТКБ"
+}
+
+<> 2024-11-29T071336.200.txt
+<> 2024-11-28T214506.200.txt
+<> 2024-11-27T185709.400.txt
+<> 2024-11-27T183824.401.txt
+
+###
+GET http://{{host}}/api/group/getAll
+API-KEY: {{apiKey}}
+
+<> 2024-11-30T043500.200.json
+<> 2024-11-29T071330.200.json
+<> 2024-11-27T184549.200.json
+
+###
+DELETE http://{{host}}/api/group/remove/3
+API-KEY: {{apiKey}}
+
+<> 2024-11-27T190705.400.txt
+
+###
+PUT http://{{host}}/api/group/update
+Content-Type: application/json
+API-KEY: {{apiKey}}
+
+{
+  "id": 2,
+  "faculty": "ФИТКБ",
+  "name": "бИСТ-221"
+}
+
+###
+GET http://{{host}}/api/students/getAll
+API-KEY: {{apiKey}}
+
+<> 2024-11-30T043807.200.json
+<> 2024-11-30T043707.200.json
+<> 2024-11-30T043505.200.json
+<> 2024-11-29T070547.200.json
+<> 2024-11-28T230716.200.json
+<> 2024-11-27T191037.200.json
+<> 2024-11-27T190708.200.json
+###
+PUT http://{{host}}/api/students/update
+Content-Type: application/json
+API-KEY: {{apiKey}}
+
+{
+  "id": 3,
+  "name": "Леня",
+  "surname": "Кравченко",
+  "patronymic": "Николаевич",
+  "groupId": 2
+}
+
+<> 2024-11-30T043838.200.txt
+<> 2024-11-30T043804.200.txt
+
+###
+POST http://{{host}}/api/students/add
+Content-Type: application/json
+API-KEY: {{apiKey}}
+
+{
+  "name": "Леня",
+  "surname": "Грустный",
+  "patronymic": "Репер",
+  "rfidCode": "68723411",
+  "groupId": 2
+}
+
+<> 2024-11-29T071341.200.txt
+<> 2024-11-29T070519.200.txt
+<> 2024-11-28T230724.200.txt
+
+###
+DELETE http://{{host}}/api/students/remove/2
+API-KEY: {{apiKey}}
+
+<> 2024-11-27T191046.200.txt
+<> 2024-11-27T190642.200.txt
+<> 2024-11-27T190637.200.txt
+<> 2024-11-27T190634.200.txt
+
+###
+GET http://{{host}}/api/lecturer/getAll
+API-KEY: {{apiKey}}
+
+<> 2024-11-27T192841.200.json
+<> 2024-11-27T192557.200.json
+
+###
+POST http://{{host}}/api/lecturer/add
+Content-Type: application/json
+API-KEY: {{apiKey}}
+
+{
+  "name": "Виктор",
+  "surname": "Ватуршин",
+  "patronymic": "Павлович"
+}
+
+<> 2024-11-28T214512.200.txt
+<> 2024-11-27T192638.200.txt
+
+###
+DELETE http://{{host}}/api/lecturer/remove/2
+API-KEY: {{apiKey}}
+
+<> 2024-11-27T192836.400.txt
+<> 2024-11-27T192832.200.txt
+<> 2024-11-27T192723.405.json
+
+###
+GET http://{{host}}/api/discipline/getAll
+API-KEY: {{apiKey}}
+
+<> 2024-11-29T061210.200.json
+<> 2024-11-27T200257.200.json
+<> 2024-11-27T200051.200.json
+###
+
+POST http://{{host}}/api/discipline/add
+Content-Type: application/json
+API-KEY: {{apiKey}}
+
+{
+  "lecturerId": 1,
+  "name": "Математика"
+}
+
+<> 2024-11-28T214517.200.txt
+<> 2024-11-27T200233.200.txt
+
+###
+PUT http://{{host}}/api/discipline/update
+Content-Type: application/json
+API-KEY: {{apiKey}}
+
+{
+  "id": 1,
+  "name": "Математика",
+  "lecturerId": 2
+}
+
+###
+DELETE http://{{host}}/api/discipline/remove/2
+API-KEY: {{apiKey}}
+
+###
+GET http://{{host}}/api/discipline/getAll/lecturer/2
+API-KEY: {{apiKey}}
+
+###
+POST http://{{host}}/api/lesson/add
+Content-Type: application/json
+API-KEY: {{apiKey}}
+
+{
+  "theme": "Проверка",
+  "disciplineId": 1,
+  "time": "2015-09-21T12:12:00",
+  "groups": [1]
+}
+
+<> 2024-11-28T225619.200.txt
+<> 2024-11-28T221030.200.txt
+<> 2024-11-28T220713.200.txt
+<> 2024-11-28T214520.200.txt
+<> 2024-11-28T213934.200.txt
+
+###
+GET http://{{host}}/api/lesson/getAll/discipline/1
+API-KEY: {{apiKey}}
+
+<> 2024-11-29T071402.200.json
+<> 2024-11-28T225956.200.json
+<> 2024-11-28T225622.500.json
+<> 2024-11-28T221035.500.json
+<> 2024-11-28T221032.500.json
+<> 2024-11-28T220719.200.json
+<> 2024-11-28T214522.200.json
+<> 2024-11-28T213937.200.json
+
+###
+DELETE http://{{host}}/api/lesson/remove/3
+API-KEY: {{apiKey}}
+
+###
+PUT http://{{host}}/api/lesson/update
+Content-Type: application/json
+API-KEY: {{apiKey}}
+
+{
+  "id": 4,
+  "disciplineId": 1,
+  "theme": "Тест",
+  "time": "2015-09-21T23:12:00",
+  "groupIds": [1, 2]
+}
+
+###
+POST http://{{host}}/api/attendance/add
+Content-Type: application/json
+API-KEY: {{apiKey}}
+
+{
+  "lessonId": 4,
+  "rfidCodes": [
+    {
+      "time": "2015-09-23T12:04",
+      "code": "34237423"
+    }
+  ]
+}
+
+<> 2024-11-28T232002.200.txt
+<> 2024-11-28T231749.200.txt
+<> 2024-11-28T231704.400.json
+<> 2024-11-28T231626.400.json
+<> 2024-11-28T230731.200.txt
+<> 2024-11-28T230252.400.txt
+
+###
+GET http://{{host}}/api/attendance/getAll/lesson/4
+API-KEY: {{apiKey}}
+
+<> 2024-11-29T071351.200.json
+<> 2024-11-29T061444.200.json
+<> 2024-11-28T232009.200.json
+<> 2024-11-28T231956.200.json
+<> 2024-11-28T231756.200.json
+<> 2024-11-28T230802.200.json
+
+###
+DELETE http://{{host}}/api/attendance/remove/34237423/4
+API-KEY: {{apiKey}}
+
+<> 2024-11-28T231953.200.txt
+<> 2024-11-28T231948.401.txt
+
+###
+GET http://{{host}}/api/lesson/getInfo/4
+API-KEY: {{apiKey}}
+
+<> 2024-11-29T071409.200.json
+<> 2024-11-29T071241.200.json
+<> 2024-11-29T070557.200.json
+<> 2024-11-29T070526.200.json
+<> 2024-11-29T070450.200.json
+<> 2024-11-29T061455.200.json

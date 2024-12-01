@@ -8,7 +8,18 @@ data class DisciplineDto(
     val id: Long? = null,
     val name: String
 )
+data class UpdateDiscipline(
+    @field:NotNull
+    val id: Long,
 
+    @field:Size(min = 3, max = 100)
+    @field:NotNull
+    @field:NotEmpty
+    val name: String,
+
+    @field:NotNull
+    val lecturerId: Long
+)
 data class NewDiscipline(
     @field:Size(min = 3, max = 100)
     @field:NotNull

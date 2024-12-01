@@ -1,11 +1,14 @@
 package com.rfidreader.services.students
 
 import com.rfidreader.infrastructures.exceptions.ProcessException
+import com.rfidreader.repositories.GroupRepository
 import com.rfidreader.repositories.StudentRepository
 import com.rfidreader.services.students.models.NewStudent
 import com.rfidreader.services.students.models.StudentDto
 import com.rfidreader.services.students.models.StudentMapper
+import com.rfidreader.services.students.models.UpdateStudent
 import jakarta.validation.Validator
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -15,7 +18,8 @@ class StudentServiceImpl(
     private val validator: Validator
 ) : StudentService {
     private val studentMapper = StudentMapper.INSTANCE
-
+    @Autowired
+    private lateinit var groupRepository: GroupRepository
     @Transactional
     override fun addStudent(newStudent: NewStudent): Unit {
         validator.validate(newStudent).let {
@@ -31,6 +35,22 @@ class StudentServiceImpl(
     override fun deleteStudentById(id: Long) {
         val entity = studentRepository.findById(id).orElseThrow { ProcessException("Student not found") }
         studentRepository.delete(entity)
+    }
+    @Transactional
+    override fun updateStudent(student: UpdateStudent) {
+        validator.validate(student).let {
+            if(it.isNotEmpty()) throw ProcessException(it.first().message)
+        }
+        val entity = studentRepository.findById(student.id)
+            .orElseThrow { ProcessException("Student not found") }
+            .also {
+                it.surname = student.surname
+                it.name = student.name
+                it.patronymic = student.patronymic
+                it.group = groupRepository.findById(student.groupId)
+                    .orElseThrow { ProcessException("Group not found") }
+            }
+        studentRepository.save(entity)
     }
     override fun getStudentsByGroupId(groupId: Long): List<StudentDto> {
         return studentRepository.getStudentByGroupId(groupId).map { studentMapper.toStudentDto(it) }

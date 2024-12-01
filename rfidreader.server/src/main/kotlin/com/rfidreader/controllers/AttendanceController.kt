@@ -18,6 +18,11 @@ class AttendanceController(private val attendanceService: AttendanceService) {
         attendanceService.addAttendances(attendances)
         return ResponseEntity.ok("Attendance successfully added")
     }
+    @DeleteMapping("/removeAll/{lessonId}")
+    fun removeAllAttendances(@PathVariable lessonId: Long): ResponseEntity<String> {
+        attendanceService.removeAllAttendance(lessonId)
+        return ResponseEntity.ok("Attendance successfully removed")
+    }
     @DeleteMapping("/remove/{rfid}/{lessonId}")
     fun removeAttendance(@PathVariable rfid: String, @PathVariable lessonId: Long): ResponseEntity<String> {
         attendanceService.removeAttendance(rfid, lessonId)

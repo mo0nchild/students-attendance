@@ -9,8 +9,8 @@ data class Group (
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long? = null,
-    val name: String,
-    val faculty: String,
+    var name: String,
+    var faculty: String,
 ) {
     @OneToMany(mappedBy = "group", cascade = [CascadeType.ALL], orphanRemoval = true)
     var students: MutableList<Student> = mutableListOf()

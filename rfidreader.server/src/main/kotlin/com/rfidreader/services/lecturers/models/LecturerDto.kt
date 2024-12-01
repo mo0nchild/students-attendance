@@ -10,6 +10,25 @@ data class LecturerDto(
     val surname: String,
     val patronymic: String
 )
+data class UpdateLecturer(
+    @field:NotNull
+    val id: Long,
+
+    @field:Size(min=3, max=50)
+    @field:NotNull
+    @field:NotEmpty
+    val name: String,
+
+    @field:Size(min=3, max=50)
+    @field:NotNull
+    @field:NotEmpty
+    val surname: String,
+
+    @field:Size(min=3, max=50)
+    @field:NotNull
+    @field:NotEmpty
+    val patronymic: String
+)
 data class NewLecturer(
     @field:Size(min=3, max=50)
     @field:NotNull
