@@ -53,6 +53,10 @@ API-KEY: {{apiKey}}
 <> 2024-11-27T191037.200.json
 <> 2024-11-27T190708.200.json
 ###
+GET http://{{host}}/api/students/getAll/group/1
+API-KEY: {{apiKey}}
+
+###
 PUT http://{{host}}/api/students/update
 Content-Type: application/json
 API-KEY: {{apiKey}}
