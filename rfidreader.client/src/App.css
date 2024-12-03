@@ -74,3 +74,14 @@ body {
   --bs-list-group-color: white;
   --bs-list-group-bg: #323232;
 }
+.form-control {
+  --bs-border-width: 0px;
+  --bs-body-bg: #242424;
+  --bs-body-color: white;
+  &::placeholder {
+    color: grey;
+  }
+}
+.form-label {
+  margin: 0;
+}

@@ -29,7 +29,8 @@
       "@core/*": [ "./*" ],
       "@styles/*": [ "styles/*" ],
       "@models/*": [ "models/*" ],
-      "@utils/*": [ "utils/*" ]
+      "@utils/*": [ "utils/*" ],
+      "@hooks/*": [ "hooks/*" ]
     }
   },
   "include": ["src"]

@@ -6,8 +6,8 @@ import path from 'path'
 const PWAOptions: Partial<VitePWAOptions> = { 
 	includeAssets: ["assets/*"],
 	manifest: {
-        name: 'Simplifying Progressive Web App (PWA) Development with Vite: A Beginners Guide',
-        short_name: 'PWA Guide',
+        name: 'Проверка посещений студентов',
+        short_name: 'Rfid Reader',
         start_url: '/',
         background_color: '#ffffff',
         theme_color: '#000000',
@@ -23,11 +23,10 @@ const PWAOptions: Partial<VitePWAOptions> = {
             type: 'image/png'
           }
         ]
-      },
-      workbox: {
-        // defining cached files formats
-        globPatterns: ["**/*.{js,css,html,ico,png,svg,webmanifest}"],
-      }
+	},
+	workbox: {
+		globPatterns: ["**/*.{js,css,html,ico,png,svg,webmanifest}"],
+	}
 } 
 
 const pathAlias: AliasOptions = [
@@ -58,6 +57,10 @@ const pathAlias: AliasOptions = [
 	{
 		find: '@models',
 		replacement: path.resolve(__dirname, 'src/models')
+	},
+	{
+		find: '@hooks',
+		replacement: path.resolve(__dirname, 'src/hooks')
 	}
 ]
 

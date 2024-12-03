@@ -6,8 +6,6 @@ import { useEffect, useState } from "react"
 import { Accordion, ListGroup } from "react-bootstrap"
 import { NavLink } from "react-router-dom"
 
-
-
 export default function GroupPage(): JSX.Element {
     const [groups, setGroups] = useState<IGroupInfo[] | null>(null)
     const [status, setStatus] = useState<LoadingStatus>('loading')

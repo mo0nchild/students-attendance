@@ -1,10 +1,9 @@
-import ModalWindow from "@components/modal/ModalWindow"
-import CustomTable, {HeaderType} from "@components/table/CustomTable"
+import Processing, { LoadingStatus } from "@components/processing/Processing"
+import CustomTable, { HeaderType } from "@components/table/CustomTable"
 import { useScanner } from "@core/hooks/scanner"
 import { studentService } from "@services/StudentService"
-import { createRef, CSSProperties, useEffect, useState } from "react"
-import { Button } from "react-bootstrap"
-import { NavLink } from "react-router-dom"
+import { CSSProperties, useEffect, useState } from "react" 
+import { Col, Container, Form, Row } from "react-bootstrap"
 import { useParams } from "react-router-dom"
 
 const tableHeader: HeaderType[] = [
@@ -42,6 +41,7 @@ export default function StudentPage(): JSX.Element {
     const [ students, setStudents ] = useState<StudentTableInfo[] | null>(null)
     const [ selected, setSelected ] = useState<StudentTableInfo | null>(null)
     const { groupId } = useParams();
+    const [ status, setStatus ] = useState<LoadingStatus>('loading')
     useEffect(() => {
         if(!groupId) throw ''
         studentService.getStudentsByGroup(parseInt(groupId))
@@ -54,9 +54,13 @@ export default function StudentPage(): JSX.Element {
                     rfidCode: p.rfidCode,
                     group: p.group.name
                 } as StudentTableInfo))
-                setStudents(data) 
+                setStudents(data)
+                setStatus('success') 
             })
-            .catch(error => console.log(error))
+            .catch(error => {
+                console.log(error)
+                setStatus('failed')
+            })
     }, [groupId])
     const onSelectStudent = (id: number) => {
         setSelected(students!.find(item => item.id == id)!)
@@ -66,38 +70,43 @@ export default function StudentPage(): JSX.Element {
         console.log(value)
         setScanning(false)
     }, scanning)
-    const updateNameRef = createRef<HTMLInputElement>()
-    const updateSurnameRef = createRef<HTMLInputElement>()
-    const updatePatronymicRef = createRef<HTMLInputElement>()
     return (
-    <div>
-        <NavLink to='/groups'>Назад</NavLink>
-        {
-            students == null ? <br/> :
+    <Container fluid='md'>
+        <h2 style={{marginBottom: '20px'}}>Управление студентами</h2>
+        <Row>
+            <Col sm={12} md={6} lg={4}>
+                <Form.Group>
+                    <Form.Label>Фамилия:</Form.Label>
+                    <Form.Control type='text' maxLength={50} placeholder='Введите фамилию' />  
+                </Form.Group>  
+            </Col>
+            <Col sm={12} md={6} lg={4}>
+                <Form.Group>
+                    <Form.Label>Фамилия:</Form.Label>
+                    <Form.Control type='text' maxLength={50} placeholder='Введите фамилию' />  
+                </Form.Group>  
+            </Col>
+            <Col sm={12} md={6} lg={4}>
+                <Form.Group>
+                    <Form.Label>Фамилия:</Form.Label>
+                    <Form.Control type='text' maxLength={50} placeholder='Введите фамилию' />  
+                </Form.Group>  
+            </Col>
+        </Row>
+        <Row style={{marginBottom: '20px'}}>
+            <Col sm={12}>
+                <p>Код пропуска: {}</p>
+            </Col>
+        </Row>
+        <Row>
+            <Processing status={status}>
                 <div style={studentTableStyle}>
-                <CustomTable header={tableHeader} data={students}
-                    onClicked={(data) => onSelectStudent(data.id)}/>
+                    <CustomTable header={tableHeader} data={students!}
+                        onClicked={(data) => onSelectStudent(data.id)}/>
                 </div>
-        }
-        <ModalWindow isOpen={selected != null} onClose={() => setSelected(null)}>
-            <div>
-                <input type="text" ref={updateSurnameRef} defaultValue={selected?.surname}/>
-                <input type="text" ref={updateNameRef} defaultValue={selected?.name}/>
-                <input type="text" ref={updatePatronymicRef} defaultValue={selected?.patronymic}/>
-                <p>rfidCode: {selected?.rfidCode}</p>
-                <div>
-                <Button onClick={() => {
-                    setScanning(!scanning)
-                }}> 
-                    { !scanning ? 'Сканировать пропуск' : 'Отменить' }
-                </Button>
-                <Button>
-                    Обновить
-                </Button>
-                </div>
-            </div>
-        </ModalWindow>
-    </div>
+            </Processing>
+        </Row>
+    </Container>
     )
 }
 const studentTableStyle: CSSProperties = {
