@@ -7,8 +7,8 @@ Content-Type: application/json
 API-KEY: {{apiKey}}
 
 {
-  "name": "бОИС-221",
-  "faculty": "ФИТКБ"
+  "name": "ЦАУ-231",
+  "faculty": "ФЭМИТ"
 }
 
 <> 2024-11-29T071336.200.txt

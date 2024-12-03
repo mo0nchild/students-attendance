@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.env.Environment
+import org.springframework.http.converter.HttpMessageConverter
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.servlet.config.annotation.CorsRegistry
 import org.springframework.web.servlet.config.annotation.EnableWebMvc
@@ -19,6 +21,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 class WebConfiguration(val apiKeyInterceptor: ApiKeyInterceptorHandler) : WebMvcConfigurer {
     @Autowired
     private lateinit var environment: Environment
+
     override fun addInterceptors(registry: InterceptorRegistry) {
         registry.addInterceptor(apiKeyInterceptor).addPathPatterns("/api/**")
     }

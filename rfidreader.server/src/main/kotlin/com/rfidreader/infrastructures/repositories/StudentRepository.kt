@@ -1,7 +1,7 @@
-package com.rfidreader.repositories
+package com.rfidreader.infrastructures.repositories
 
+import com.rfidreader.infrastructures.repositories.customs.StudentCustomRepository
 import com.rfidreader.models.Student
-import com.rfidreader.repositories.customs.StudentCustomRepository
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param

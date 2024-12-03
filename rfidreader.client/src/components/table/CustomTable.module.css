@@ -1,0 +1,9 @@
+.tableMain {
+    & th {
+        font-weight: 600;
+        text-decoration: underline;
+    }
+    & tr>td {
+        cursor: pointer;
+    }
+}

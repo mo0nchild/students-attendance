@@ -2,9 +2,9 @@ package com.rfidreader.services.attendance
 
 import com.rfidreader.infrastructures.exceptions.ProcessException
 import com.rfidreader.models.Attendance
-import com.rfidreader.repositories.AttendanceRepository
-import com.rfidreader.repositories.LessonRepository
-import com.rfidreader.repositories.StudentRepository
+import com.rfidreader.infrastructures.repositories.AttendanceRepository
+import com.rfidreader.infrastructures.repositories.LessonRepository
+import com.rfidreader.infrastructures.repositories.StudentRepository
 import com.rfidreader.services.attendance.models.AttendanceDto
 import com.rfidreader.services.attendance.models.AttendanceMapper
 import com.rfidreader.services.attendance.models.NewAttendances
@@ -12,8 +12,6 @@ import jakarta.validation.Validator
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.sql.Timestamp
-import java.time.LocalDateTime
 
 @Service
 open class AttendanceServiceImpl(

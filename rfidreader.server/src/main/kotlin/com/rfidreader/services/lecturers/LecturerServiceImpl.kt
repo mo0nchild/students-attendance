@@ -1,8 +1,7 @@
 package com.rfidreader.services.lecturers
 
 import com.rfidreader.infrastructures.exceptions.ProcessException
-import com.rfidreader.models.Lecturer
-import com.rfidreader.repositories.LecturerRepository
+import com.rfidreader.infrastructures.repositories.LecturerRepository
 import com.rfidreader.services.lecturers.models.LecturerDto
 import com.rfidreader.services.lecturers.models.LecturerMapper
 import com.rfidreader.services.lecturers.models.NewLecturer

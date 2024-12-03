@@ -1,4 +1,4 @@
-package com.rfidreader.repositories
+package com.rfidreader.infrastructures.repositories
 
 import com.rfidreader.models.Attendance
 import com.rfidreader.services.attendance.models.AttendanceDto

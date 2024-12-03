@@ -1,8 +1,8 @@
 package com.rfidreader.services.students
 
 import com.rfidreader.infrastructures.exceptions.ProcessException
-import com.rfidreader.repositories.GroupRepository
-import com.rfidreader.repositories.StudentRepository
+import com.rfidreader.infrastructures.repositories.GroupRepository
+import com.rfidreader.infrastructures.repositories.StudentRepository
 import com.rfidreader.services.students.models.NewStudent
 import com.rfidreader.services.students.models.StudentDto
 import com.rfidreader.services.students.models.StudentMapper

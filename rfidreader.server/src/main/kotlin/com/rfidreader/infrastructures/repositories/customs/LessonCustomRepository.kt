@@ -1,4 +1,4 @@
-package com.rfidreader.repositories.customs
+package com.rfidreader.infrastructures.repositories.customs
 
 import com.rfidreader.infrastructures.exceptions.ProcessException
 import com.rfidreader.models.Discipline
@@ -6,7 +6,6 @@ import com.rfidreader.models.Group
 import com.rfidreader.models.Lesson
 import jakarta.persistence.EntityManager
 import jakarta.persistence.PersistenceContext
-import jakarta.persistence.criteria.JoinType
 import org.springframework.stereotype.Repository
 import org.springframework.transaction.annotation.Transactional
 

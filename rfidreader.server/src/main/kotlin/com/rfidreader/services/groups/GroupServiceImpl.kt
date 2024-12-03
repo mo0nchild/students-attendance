@@ -1,7 +1,7 @@
 package com.rfidreader.services.groups
 
 import com.rfidreader.infrastructures.exceptions.ProcessException
-import com.rfidreader.repositories.GroupRepository
+import com.rfidreader.infrastructures.repositories.GroupRepository
 import com.rfidreader.services.groups.models.GroupDto
 import com.rfidreader.services.groups.models.GroupMapper
 import com.rfidreader.services.groups.models.NewGroup

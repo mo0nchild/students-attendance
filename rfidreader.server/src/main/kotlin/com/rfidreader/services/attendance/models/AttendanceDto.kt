@@ -1,5 +1,6 @@
 package com.rfidreader.services.attendance.models
 
+import com.fasterxml.jackson.annotation.JsonFormat
 import com.rfidreader.services.students.models.StudentDto
 import jakarta.validation.Valid
 import jakarta.validation.constraints.NotEmpty
@@ -8,6 +9,7 @@ import java.time.LocalDateTime
 
 data class AttendanceDto(
     var id: Long? = null,
+    @field:JsonFormat(pattern="yyyy-MM-dd'T'HH:mm")
     val time: LocalDateTime,
     val student: StudentDto,
 )

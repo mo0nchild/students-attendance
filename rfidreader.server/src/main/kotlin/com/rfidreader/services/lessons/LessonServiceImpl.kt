@@ -1,12 +1,10 @@
 package com.rfidreader.services.lessons
 
 import com.rfidreader.infrastructures.exceptions.ProcessException
-import com.rfidreader.repositories.AttendanceRepository
-import com.rfidreader.repositories.DisciplineRepository
-import com.rfidreader.repositories.GroupRepository
-import com.rfidreader.repositories.LessonRepository
-import com.rfidreader.repositories.customs.LessonCustomRepository
-import com.rfidreader.services.attendance.AttendanceService
+import com.rfidreader.infrastructures.repositories.DisciplineRepository
+import com.rfidreader.infrastructures.repositories.GroupRepository
+import com.rfidreader.infrastructures.repositories.LessonRepository
+import com.rfidreader.infrastructures.repositories.customs.LessonCustomRepository
 import com.rfidreader.services.lessons.models.LessonDto
 
 import com.rfidreader.services.lessons.models.LessonMapper

@@ -1,13 +1,12 @@
 package com.rfidreader.services.disciplines
 
 import com.rfidreader.infrastructures.exceptions.ProcessException
-import com.rfidreader.repositories.DisciplineRepository
-import com.rfidreader.repositories.LecturerRepository
+import com.rfidreader.infrastructures.repositories.DisciplineRepository
+import com.rfidreader.infrastructures.repositories.LecturerRepository
 import com.rfidreader.services.disciplines.models.DisciplineDto
 import com.rfidreader.services.disciplines.models.DisciplineMapper
 import com.rfidreader.services.disciplines.models.NewDiscipline
 import com.rfidreader.services.disciplines.models.UpdateDiscipline
-import com.rfidreader.services.lecturers.LecturerService
 import jakarta.validation.Validator
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service

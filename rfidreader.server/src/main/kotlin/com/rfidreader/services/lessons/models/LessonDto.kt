@@ -1,7 +1,6 @@
 package com.rfidreader.services.lessons.models
 
 import com.fasterxml.jackson.annotation.JsonFormat
-import com.rfidreader.services.attendance.models.AttendanceDto
 import com.rfidreader.services.disciplines.models.DisciplineDto
 import com.rfidreader.services.groups.models.GroupDto
 import com.rfidreader.services.students.models.StudentDto
@@ -13,12 +12,14 @@ import java.time.LocalDateTime
 data class LessonDto(
     val id: Long? = null,
     val theme: String,
+    @field:JsonFormat(pattern="yyyy-MM-dd'T'HH:mm")
     val time: LocalDateTime? = null,
     val discipline: DisciplineDto? = null,
     val groups: List<GroupDto> = listOf(),
 )
 data class StudentOnLesson(
     val student: StudentDto,
+    @field:JsonFormat(pattern="yyyy-MM-dd'T'HH:mm")
     val time: LocalDateTime? = null,
 )
 data class UpdateLesson(
