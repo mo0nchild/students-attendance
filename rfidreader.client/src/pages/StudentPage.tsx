@@ -2,8 +2,8 @@ import Processing, { LoadingStatus } from "@components/processing/Processing"
 import CustomTable, { HeaderType } from "@components/table/CustomTable"
 import { useScanner } from "@core/hooks/scanner"
 import { studentService } from "@services/StudentService"
-import { CSSProperties, useEffect, useState } from "react" 
-import { Col, Container, Form, Row } from "react-bootstrap"
+import { createRef, CSSProperties, useEffect, useState } from "react" 
+import { Button, Col, Container, Form, Row } from "react-bootstrap"
 import { useParams } from "react-router-dom"
 
 const tableHeader: HeaderType[] = [
@@ -62,14 +62,20 @@ export default function StudentPage(): JSX.Element {
                 setStatus('failed')
             })
     }, [groupId])
-    const onSelectStudent = (id: number) => {
+    const onSelectStudentHandler = (id: number) => {
         setSelected(students!.find(item => item.id == id)!)
+        updateCheckRef.current!.checked = true
     }
+    const onScanningRfidHandler = () => {}
     const [scanning, setScanning] = useState(false)
     useScanner(value => {
         console.log(value)
         setScanning(false)
     }, scanning)
+    const surnameRef = createRef<HTMLInputElement>()
+    const nameRef = createRef<HTMLInputElement>()
+    const patronymicRef = createRef<HTMLInputElement>()
+    const updateCheckRef = createRef<HTMLInputElement>()
     return (
     <Container fluid='md'>
         <h2 style={{marginBottom: '20px'}}>Управление студентами</h2>
@@ -77,32 +83,55 @@ export default function StudentPage(): JSX.Element {
             <Col sm={12} md={6} lg={4}>
                 <Form.Group>
                     <Form.Label>Фамилия:</Form.Label>
-                    <Form.Control type='text' maxLength={50} placeholder='Введите фамилию' />  
+                    <Form.Control type='text' maxLength={50} placeholder='Введите фамилию' 
+                        defaultValue={selected == null ? '' : selected.surname}/>  
                 </Form.Group>  
             </Col>
             <Col sm={12} md={6} lg={4}>
                 <Form.Group>
-                    <Form.Label>Фамилия:</Form.Label>
-                    <Form.Control type='text' maxLength={50} placeholder='Введите фамилию' />  
+                    <Form.Label>Имя:</Form.Label>
+                    <Form.Control type='text' maxLength={50} placeholder='Введите имя' 
+                        defaultValue={selected == null ? '' : selected.name}/>  
                 </Form.Group>  
             </Col>
             <Col sm={12} md={6} lg={4}>
                 <Form.Group>
-                    <Form.Label>Фамилия:</Form.Label>
-                    <Form.Control type='text' maxLength={50} placeholder='Введите фамилию' />  
+                    <Form.Label>Отчество:</Form.Label>
+                    <Form.Control type='text' maxLength={50} placeholder='Введите отчество' 
+                        defaultValue={selected == null ? '' : selected.patronymic}/>  
                 </Form.Group>  
             </Col>
         </Row>
-        <Row style={{marginBottom: '20px'}}>
-            <Col sm={12}>
-                <p>Код пропуска: {}</p>
+        <Row style={{margin: '10px 0px'}}>
+            <Col sm={6} md={6} lg={4}>
+                <p>Код пропуска: {selected?.rfidCode == null ? 'None' : selected.rfidCode}</p>
+            </Col>
+            <Col sm={6} md={6} lg={4}>
+            <Form.Check type='checkbox' disabled={selected == null} label='Обновление' 
+                ref={updateCheckRef} onChange={(event) => {
+                    const { checked } = event.currentTarget
+                    if (checked == false && selected != null) {
+                        setSelected(null)
+                    }
+                }}
+            />
+            </Col>
+        </Row>
+        <Row className='gy-2 gx-3' style={{margin: '0px 0px 20px'}}>
+            <Col sm={6} md={4}>
+                <Button style={{width: '100%'}}>Считать пропуск</Button>
+            </Col>
+            <Col sm={6} md={4}>
+                <Button style={{width: '100%'}}>
+                    { selected == null ? 'Добавить' : 'Обновить' }
+                </Button>
             </Col>
         </Row>
         <Row>
             <Processing status={status}>
                 <div style={studentTableStyle}>
                     <CustomTable header={tableHeader} data={students!}
-                        onClicked={(data) => onSelectStudent(data.id)}/>
+                        onClicked={(data) => onSelectStudentHandler(data.id)}/>
                 </div>
             </Processing>
         </Row>

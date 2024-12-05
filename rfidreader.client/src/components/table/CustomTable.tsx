@@ -9,11 +9,14 @@ export type HeaderType = { key: string, name: string }
 
 export interface ICustomTableProps {
     data: DataType[]
-    header: HeaderType[],
+    header: HeaderType[]
     onClicked?: (data: DataType) => void
+    minSize?: number
 }
+const tableMinSize = 5
 export default function CustomTable(props: ICustomTableProps): JSX.Element {
     const { data, header, onClicked } = props
+    const minSize = props.minSize == undefined ? tableMinSize : props.minSize
     return (
     <div>
     <Table striped bordered hover className={style.tableMain} variant='dark'>
@@ -30,6 +33,15 @@ export default function CustomTable(props: ICustomTableProps): JSX.Element {
             )
         })
         }
+        {
+        data.length < minSize ? Array.from(Array(minSize - data.length).keys()).map((_, index) => {
+            return (
+            <tr key={`table-fake#${index}`}>
+                { header.map((_, i) => <td key={`tfake#${i}`}>&nbsp;</td>) }
+            </tr>
+            )
+        }) : null
+        } 
         </tbody>
     </Table>
     </div>

@@ -2,6 +2,7 @@ html, body, #root {
   height: 100%;
   width: 100%;
   color: white;
+  background: #323232;
 }
 body {
   display: block;
@@ -15,8 +16,9 @@ body {
   height: 100%;
   background: #323232;
   .page-content {
-    padding: 30px 40px;
+    padding: 0px 40px 10px;
     flex-grow: 1;
+    margin: 80px 0px 0px;
   }
 }
 .navbar-toggler-icon {
@@ -78,10 +80,33 @@ body {
   --bs-border-width: 0px;
   --bs-body-bg: #242424;
   --bs-body-color: white;
+  --bs-border-color: white;
   &::placeholder {
     color: grey;
+  }
+  &:focus {
+    box-shadow: none;
   }
 }
 .form-label {
   margin: 0;
+}
+.form-check-input {
+  background-color: #222222;
+  &:focus {
+    box-shadow: none;
+  }
+  &:checked[type=checkbox] {
+    --bs-form-check-bg-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path fill="none" stroke="%23242424" stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="m6 10 3 3 6-6"/></svg>') !important;
+    background-color: white;
+  }
+}
+.btn.btn-primary {
+  --bs-btn-color: white;
+  --bs-btn-bg: #242424;
+  --bs-btn-border-color: white;
+  --bs-btn-hover-bg: #282828;
+  --bs-btn-active-bg: #282828;
+  --bs-btn-hover-border-color: white;
+  --bs-btn-active-border-color: white;
 }
