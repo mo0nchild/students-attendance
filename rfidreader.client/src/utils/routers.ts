@@ -18,7 +18,7 @@ export const routers = createBrowserRouter([
         element: createElement(GroupPage)
     },
     {
-        path: '/students/:groupId',
+        path: '/students/:groupId/:groupName',
         element: createElement(StudentPage)
     },
     {
@@ -26,7 +26,7 @@ export const routers = createBrowserRouter([
         element: createElement(LecturerPage)
     }, 
     {
-        path: '/disciplines',
+        path: '/disciplines/:lecturer',
         element: createElement(DisciplinePage)
     }, 
     {

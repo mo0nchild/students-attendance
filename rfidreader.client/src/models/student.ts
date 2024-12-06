@@ -21,4 +21,5 @@ export interface IUpdateStudent {
     surname: string
     patronymic: string
     groupId: number
+    rfidCode: string
 }

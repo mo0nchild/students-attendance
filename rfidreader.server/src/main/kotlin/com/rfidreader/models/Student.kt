@@ -12,7 +12,7 @@ data class Student (
     var name: String,
     var surname: String,
     var patronymic: String,
-    val rfidCode: String,
+    var rfidCode: String,
 ) {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "group_id")

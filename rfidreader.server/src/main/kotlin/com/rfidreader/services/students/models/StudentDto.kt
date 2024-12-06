@@ -34,6 +34,10 @@ data class UpdateStudent(
     val patronymic: String,
 
     @field:NotNull
+    @field:NotEmpty
+    val rfidCode: String,
+
+    @field:NotNull
     val groupId: Long
 )
 

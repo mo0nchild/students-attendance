@@ -16,7 +16,7 @@ body {
   height: 100%;
   background: #323232;
   .page-content {
-    padding: 0px 40px 10px;
+    padding: 0px 0px 10px;
     flex-grow: 1;
     margin: 80px 0px 0px;
   }
@@ -109,4 +109,8 @@ body {
   --bs-btn-active-bg: #282828;
   --bs-btn-hover-border-color: white;
   --bs-btn-active-border-color: white;
+  &:disabled {
+    background-color: #282828;
+    border-color: grey;
+  }
 }

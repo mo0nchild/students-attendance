@@ -1,9 +1,14 @@
+import ModalWindow from "@components/modal/ModalWindow"
 import Processing, { LoadingStatus } from "@components/processing/Processing"
 import CustomTable, { HeaderType } from "@components/table/CustomTable"
 import { useScanner } from "@core/hooks/scanner"
+import { IGroupInfo } from "@core/models/group"
+import { IStudentInfo } from "@core/models/student"
+import { groupService } from "@services/GroupService"
 import { studentService } from "@services/StudentService"
-import { createRef, CSSProperties, useEffect, useState } from "react" 
-import { Button, Col, Container, Form, Row } from "react-bootstrap"
+import { createRef, CSSProperties, useCallback, useEffect, useState } from "react" 
+import { Button, Col, Container, Dropdown, Form, Row, Spinner } from "react-bootstrap"
+import { Link } from "react-router-dom"
 import { useParams } from "react-router-dom"
 
 const tableHeader: HeaderType[] = [
@@ -37,23 +42,37 @@ interface StudentTableInfo {
     rfidCode: string
     group: string
 }
+const surnameRef = createRef<HTMLInputElement>()
+const nameRef = createRef<HTMLInputElement>()
+const patronymicRef = createRef<HTMLInputElement>()
+const updateCheckRef = createRef<HTMLInputElement>()
+
+function convertLecturerToTableInfo(info: IStudentInfo): StudentTableInfo {
+    return {
+        id: info.id,
+        surname: info.surname,
+        name: info.name,
+        patronymic: info.patronymic,
+        rfidCode: info.rfidCode,
+        group: info.group.name
+    } as StudentTableInfo
+} 
 export default function StudentPage(): JSX.Element {
     const [ students, setStudents ] = useState<StudentTableInfo[] | null>(null)
     const [ selected, setSelected ] = useState<StudentTableInfo | null>(null)
-    const { groupId } = useParams();
     const [ status, setStatus ] = useState<LoadingStatus>('loading')
+    const [ scanning, setScanning ] = useState<boolean>(false)
+    const [ rfidValue, setRfidValue ] = useState<string | null>(null)
+
+    const [ groups, setGroups ] = useState<IGroupInfo[]>()
+    const [ selectedGroup, setSelectedGroup ] = useState<IGroupInfo | null>(null)
+    const [ updateUuid, setUpdateUuid ] = useState<string>(crypto.randomUUID())
+    const { groupId, groupName } = useParams();
     useEffect(() => {
-        if(!groupId) throw ''
+        if(!groupId) throw 'Группа не указана'
         studentService.getStudentsByGroup(parseInt(groupId))
             .then(item => {
-                const data = item.data.map(p => ({
-                    id: p.id,
-                    surname: p.surname,
-                    name: p.name,
-                    patronymic: p.patronymic,
-                    rfidCode: p.rfidCode,
-                    group: p.group.name
-                } as StudentTableInfo))
+                const data = item.data.map(p => convertLecturerToTableInfo(p))
                 setStudents(data)
                 setStatus('success') 
             })
@@ -61,50 +80,139 @@ export default function StudentPage(): JSX.Element {
                 console.log(error)
                 setStatus('failed')
             })
-    }, [groupId])
-    const onSelectStudentHandler = (id: number) => {
-        setSelected(students!.find(item => item.id == id)!)
+    }, [groupId, groupName, updateUuid])
+    useEffect(() => {
+        groupService.getAllGroups()
+            .then(item => setGroups(item.data))
+            .catch(error => console.log(error))
+    }, [])
+    const onSelectStudentHandler = useCallback((id: number) => {
+        const currentStudent = students!.find(item => item.id == id)!
+        const currentGroup = groups!.find(item => item.name == currentStudent.group)!
+        {
+            setSelected(currentStudent)
+            setRfidValue(currentStudent.rfidCode)
+            setSelectedGroup(currentGroup)
+        }
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        })
         updateCheckRef.current!.checked = true
+    }, [groups, students])
+    const onApplyStudentHandler = useCallback(async () => {
+        if (rfidValue == null || rfidValue.length <= 0) {
+            alert('Значение код пропуска не установлено')
+            return
+        }
+        const requestData = {
+            surname: surnameRef.current!.value,
+            name: nameRef.current!.value,
+            patronymic: patronymicRef.current!.value,
+        }
+        try {
+            const response = selected == null ? await studentService.addStudent({
+                ...requestData,
+                groupId: parseInt(groupId!),
+                rfidCode: rfidValue,
+            }) : await studentService.updateStudent({
+                ...requestData,
+                id: selected.id,
+                groupId: selectedGroup == null ? parseInt(groupId!) : selectedGroup.id,
+                rfidCode: rfidValue
+            })
+            if (response.status == 200) {
+                alert('Запрос успешно выполнен')
+                setUpdateUuid(crypto.randomUUID())
+                clearInputForm()
+            }
+        }
+        catch(error) {
+            alert('Ошибка выполнения запроса')
+            console.log(error)
+        }
+    }, [groupId, rfidValue, selected, selectedGroup])
+    const onRemoveStudentHandler = useCallback(async () => {
+        if(selected != null) {
+            if ((await studentService.removeStudent(selected.id)).status == 200) {
+                alert('Запрос успешно выполнен')
+                setUpdateUuid(crypto.randomUUID())
+                clearInputForm()
+            }
+        }
+    }, [selected])
+    const clearInputForm = () => {
+        updateCheckRef.current!.checked = false
+        {
+            setRfidValue(null)
+            setSelected(null)
+            setSelectedGroup(null)
+        }
+        surnameRef.current!.defaultValue = nameRef.current!.defaultValue 
+            = patronymicRef.current!.defaultValue = ''
     }
-    const onScanningRfidHandler = () => {}
-    const [scanning, setScanning] = useState(false)
     useScanner(value => {
-        console.log(value)
-        setScanning(false)
+        if(value != undefined && value.length > 0) {
+            setScanning(false)
+            setRfidValue(value)
+        }
     }, scanning)
-    const surnameRef = createRef<HTMLInputElement>()
-    const nameRef = createRef<HTMLInputElement>()
-    const patronymicRef = createRef<HTMLInputElement>()
-    const updateCheckRef = createRef<HTMLInputElement>()
     return (
-    <Container fluid='md'>
-        <h2 style={{marginBottom: '20px'}}>Управление студентами</h2>
-        <Row>
+    <div>
+    <Container fluid='sm'>
+        <div style={pageHeaderStyle}>
+            <Link style={headerLinkStyle} to={'/groups'}>&#8592;&nbsp;
+                <span style={{textDecoration: 'underline', textUnderlineOffset: '5px'}}>Назад</span>
+            </Link>
+            <h2 style={{display: 'inline-block'}}>Управление студентами [{groupName}]</h2>
+        </div>
+        <Row className='gy-2 gy-lg-3 gx-3'>
             <Col sm={12} md={6} lg={4}>
                 <Form.Group>
                     <Form.Label>Фамилия:</Form.Label>
                     <Form.Control type='text' maxLength={50} placeholder='Введите фамилию' 
+                        ref={surnameRef}
                         defaultValue={selected == null ? '' : selected.surname}/>  
                 </Form.Group>  
             </Col>
             <Col sm={12} md={6} lg={4}>
                 <Form.Group>
                     <Form.Label>Имя:</Form.Label>
-                    <Form.Control type='text' maxLength={50} placeholder='Введите имя' 
+                    <Form.Control type='text' maxLength={50} placeholder='Введите имя'
+                        ref={nameRef} 
                         defaultValue={selected == null ? '' : selected.name}/>  
                 </Form.Group>  
             </Col>
             <Col sm={12} md={6} lg={4}>
                 <Form.Group>
                     <Form.Label>Отчество:</Form.Label>
-                    <Form.Control type='text' maxLength={50} placeholder='Введите отчество' 
+                    <Form.Control type='text' maxLength={50} placeholder='Введите отчество'
+                        ref={patronymicRef}  
                         defaultValue={selected == null ? '' : selected.patronymic}/>  
                 </Form.Group>  
+            </Col>
+            <Col sm={12} md={6} lg={4}>
+                <Dropdown style={drowDownStyle}>
+                    <Dropdown.Toggle disabled={selected == null}>
+                        { selectedGroup == null || selected == null ? 'Выбрать группу' : `${selectedGroup.faculty} ${selectedGroup.name}` }
+                    </Dropdown.Toggle>
+                    <Dropdown.Menu style={{ maxHeight: '300px', overflowY: 'auto' }}>
+                    {
+                        groups == undefined ? null : groups!.map((item, index) => {
+                            return (
+                            <Dropdown.Item key={index} eventKey={index} onClick={() => {
+                                setSelectedGroup(item)
+                            }}>{`${item.faculty} ${item.name}`}</Dropdown.Item>
+                            )
+                        })
+                    }
+                    </Dropdown.Menu>
+                </Dropdown>
             </Col>
         </Row>
         <Row style={{margin: '10px 0px'}}>
             <Col sm={6} md={6} lg={4}>
-                <p>Код пропуска: {selected?.rfidCode == null ? 'None' : selected.rfidCode}</p>
+                <p>Код пропуска: {rfidValue == null ? 'None' : rfidValue}</p>
             </Col>
             <Col sm={6} md={6} lg={4}>
             <Form.Check type='checkbox' disabled={selected == null} label='Обновление' 
@@ -112,17 +220,28 @@ export default function StudentPage(): JSX.Element {
                     const { checked } = event.currentTarget
                     if (checked == false && selected != null) {
                         setSelected(null)
+                        setRfidValue(null)
                     }
                 }}
             />
             </Col>
         </Row>
         <Row className='gy-2 gx-3' style={{margin: '0px 0px 20px'}}>
-            <Col sm={6} md={4}>
-                <Button style={{width: '100%'}}>Считать пропуск</Button>
+            <Col xs={12} sm={6} md={4} >
+                <Button style={{width: '100%'}} onClick={(event) => {
+                    event.currentTarget.blur()
+                    setScanning(true)
+                }}>
+                    Считать пропуск
+                </Button>
             </Col>
-            <Col sm={6} md={4}>
-                <Button style={{width: '100%'}}>
+            <Col xs={12} sm={6} md={4}>
+                <Button style={{width: '100%'}} disabled={selected == null} onClick={onRemoveStudentHandler}>
+                    Удалить
+                </Button>
+            </Col>
+            <Col xs={12} sm={6} md={4}>
+                <Button style={{width: '100%'}} onClick={onApplyStudentHandler}>
                     { selected == null ? 'Добавить' : 'Обновить' }
                 </Button>
             </Col>
@@ -136,8 +255,35 @@ export default function StudentPage(): JSX.Element {
             </Processing>
         </Row>
     </Container>
+    <ModalWindow isOpen={scanning} onClose={() => setScanning(false)}>
+        <div style={scannerModalStyle}>
+            <Spinner animation="grow" />
+            <p>Сканирование пропуска...</p>
+        </div>
+    </ModalWindow>
+    </div>
     )
 }
 const studentTableStyle: CSSProperties = {
     overflowX: 'auto'
+}
+const drowDownStyle: CSSProperties = {
+    height: '100%',
+    display: 'flex',
+    flexFlow: 'column',
+    justifyContent: 'end'
+}
+const pageHeaderStyle: CSSProperties = {
+    marginBottom: '14px', 
+}
+const headerLinkStyle: CSSProperties = { 
+    color: 'white', 
+    display: 'inline-block', 
+    marginRight: '10px',
+}
+const scannerModalStyle: CSSProperties = {
+    display: 'flex',
+    flexFlow: 'column nowrap',
+    alignItems: 'center',
+    gap: '10px'
 }

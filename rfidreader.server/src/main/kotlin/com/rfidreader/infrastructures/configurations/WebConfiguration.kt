@@ -26,8 +26,9 @@ class WebConfiguration(val apiKeyInterceptor: ApiKeyInterceptorHandler) : WebMvc
         registry.addInterceptor(apiKeyInterceptor).addPathPatterns("/api/**")
     }
     override fun addCorsMappings(registry: CorsRegistry) {
+        val origins = environment.getProperty("security.allow-origin", Array<String>::class.java)
         registry.addMapping("/**")
-            .allowedOrigins(environment.getProperty("security.allow-origin"))
+            .allowedOrigins(*origins!!)
             .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
             .allowedHeaders("*")
     }

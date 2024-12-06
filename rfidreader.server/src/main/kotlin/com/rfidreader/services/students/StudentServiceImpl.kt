@@ -49,6 +49,7 @@ class StudentServiceImpl(
                 it.patronymic = student.patronymic
                 it.group = groupRepository.findById(student.groupId)
                     .orElseThrow { ProcessException("Group not found") }
+                it.rfidCode = student.rfidCode
             }
         studentRepository.save(entity)
     }
