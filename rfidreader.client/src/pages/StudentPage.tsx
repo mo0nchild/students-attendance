@@ -72,8 +72,7 @@ export default function StudentPage(): JSX.Element {
         if(!groupId) throw 'Группа не указана'
         studentService.getStudentsByGroup(parseInt(groupId))
             .then(item => {
-                const data = item.data.map(p => convertLecturerToTableInfo(p))
-                setStudents(data)
+                setStudents(item.data.map(p => convertLecturerToTableInfo(p)))
                 setStatus('success') 
             })
             .catch(error => {
@@ -141,6 +140,11 @@ export default function StudentPage(): JSX.Element {
             }
         }
     }, [selected])
+    useEffect(() => {
+        surnameRef.current!.value = selected == null ? '' : selected.surname
+        nameRef.current!.value = selected == null ? '' : selected.name
+        patronymicRef.current!.value = selected == null ? '' : selected.patronymic
+    }, [selected])
     const clearInputForm = () => {
         updateCheckRef.current!.checked = false
         {
@@ -148,8 +152,6 @@ export default function StudentPage(): JSX.Element {
             setSelected(null)
             setSelectedGroup(null)
         }
-        surnameRef.current!.defaultValue = nameRef.current!.defaultValue 
-            = patronymicRef.current!.defaultValue = ''
     }
     useScanner(value => {
         if(value != undefined && value.length > 0) {
@@ -171,24 +173,21 @@ export default function StudentPage(): JSX.Element {
                 <Form.Group>
                     <Form.Label>Фамилия:</Form.Label>
                     <Form.Control type='text' maxLength={50} placeholder='Введите фамилию' 
-                        ref={surnameRef}
-                        defaultValue={selected == null ? '' : selected.surname}/>  
+                        ref={surnameRef}/>  
                 </Form.Group>  
             </Col>
             <Col sm={12} md={6} lg={4}>
                 <Form.Group>
                     <Form.Label>Имя:</Form.Label>
                     <Form.Control type='text' maxLength={50} placeholder='Введите имя'
-                        ref={nameRef} 
-                        defaultValue={selected == null ? '' : selected.name}/>  
+                        ref={nameRef}/>  
                 </Form.Group>  
             </Col>
             <Col sm={12} md={6} lg={4}>
                 <Form.Group>
                     <Form.Label>Отчество:</Form.Label>
                     <Form.Control type='text' maxLength={50} placeholder='Введите отчество'
-                        ref={patronymicRef}  
-                        defaultValue={selected == null ? '' : selected.patronymic}/>  
+                        ref={patronymicRef}/>  
                 </Form.Group>  
             </Col>
             <Col sm={12} md={6} lg={4}>

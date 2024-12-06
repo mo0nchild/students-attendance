@@ -68,10 +68,13 @@ export default function GroupPage(): JSX.Element {
             console.log(error)
         }
     }, [])
+    useEffect(() => {
+        groupNameRef.current!.value = selected == null ? '' : selected.name
+        facultyRef.current!.value = selected == null ? '' : selected.faculty
+    }, [selected])
     const clearInputForm = () => {
         updateCheckRef.current!.checked = false
         setSelected(null)
-        groupNameRef.current!.defaultValue = facultyRef.current!.defaultValue = ''
     }
     const renderGroupsList = (): JSX.Element => {
         if (groups == null || groups.length <= 0) return <div></div>
@@ -127,8 +130,7 @@ export default function GroupPage(): JSX.Element {
                 <Form.Group>
                     <Form.Label>Название группы:</Form.Label>
                     <Form.Control type='text' maxLength={50} placeholder='Введите название группы' 
-                        ref={groupNameRef}
-                        defaultValue={selected == null ? '' : selected.name}/>  
+                        ref={groupNameRef}/>  
                 </Form.Group> 
                 
             </Col>
@@ -136,8 +138,7 @@ export default function GroupPage(): JSX.Element {
                 <Form.Group>
                     <Form.Label>Название факультета:</Form.Label>
                     <Form.Control type='text' maxLength={50} placeholder='Введите название факультета' 
-                        ref={facultyRef}
-                        defaultValue={selected == null ? '' : selected.faculty}/>  
+                        ref={facultyRef}/>  
                 </Form.Group>   
             </Col>
         </Row>

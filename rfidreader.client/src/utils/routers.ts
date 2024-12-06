@@ -26,7 +26,7 @@ export const routers = createBrowserRouter([
         element: createElement(LecturerPage)
     }, 
     {
-        path: '/disciplines/:lecturer',
+        path: '/disciplines/:lecturerId',
         element: createElement(DisciplinePage)
     }, 
     {

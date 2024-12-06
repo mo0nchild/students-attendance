@@ -1,7 +1,7 @@
 import Processing, { LoadingStatus } from "@components/processing/Processing";
 import { ILecturerInfo } from "@core/models/lecturer";
 import { lecturerService } from "@services/LecturerService";
-import { createRef, CSSProperties, useEffect, useState } from "react";
+import { createRef, CSSProperties, useCallback, useEffect, useState } from "react";
 import { Button, Col, Container, Dropdown, Form, ListGroup, Row } from "react-bootstrap";
 
 const surnameRef = createRef<HTMLInputElement>()
@@ -25,7 +25,7 @@ export default function LecturerPage(): JSX.Element {
                 setStatus('failed')
             })
     }, [updateUuid])
-    const onApplyLecturerHandler = async() => {
+    const onApplyLecturerHandler = useCallback(async() => {
         const requestData = {
             name: nameRef.current!.value,
             patronymic: patronymicRef.current!.value,
@@ -47,16 +47,16 @@ export default function LecturerPage(): JSX.Element {
             alert('Ошибка выполнения запроса')
             console.log(error)
         }
-    }
-    const onSelectLecturerHandler = (id: number) => { 
+    }, [selected])
+    const onSelectLecturerHandler = useCallback((id: number) => { 
         setSelected(lecturers!.find(item => item.id == id)!)
         window.scrollTo({
             top: 0,
             behavior: 'smooth'
         })
         updateCheckRef.current!.checked = true
-    }
-    const onRemoveLecturerHandler = async(id: number) => {
+    }, [lecturers])
+    const onRemoveLecturerHandler = useCallback(async(id: number) => {
         try {
             if((await lecturerService.removeLecturer(id)).status == 200) {
                 alert('Запрос успешно выполнен')
@@ -68,12 +68,15 @@ export default function LecturerPage(): JSX.Element {
             alert('Ошибка выполнения запроса')
             console.log(error)
         }
-    }
+    }, [])
+    useEffect(() => {
+        surnameRef.current!.value = selected == null ? '' : selected.surname
+        nameRef.current!.value = selected == null ? '' : selected.name
+        patronymicRef.current!.value = selected == null ? '' : selected.patronymic
+    }, [selected])
     const clearInputForm = () => {
         updateCheckRef.current!.checked = false
         setSelected(null)
-        surnameRef.current!.defaultValue = nameRef.current!.defaultValue 
-            = patronymicRef.current!.defaultValue = ''
     }
     return (
     <div className='h-100'>
@@ -86,8 +89,7 @@ export default function LecturerPage(): JSX.Element {
                 <Form.Group>
                     <Form.Label>Фамилия:</Form.Label>
                     <Form.Control type='text' maxLength={50} placeholder='Введите фамилию' 
-                        ref={surnameRef}
-                        defaultValue={selected == null ? '' : selected.surname}/>  
+                        ref={surnameRef}/>  
                 </Form.Group> 
                 
             </Col>
@@ -95,16 +97,14 @@ export default function LecturerPage(): JSX.Element {
                 <Form.Group>
                     <Form.Label>Имя:</Form.Label>
                     <Form.Control type='text' maxLength={50} placeholder='Введите имя' 
-                        ref={nameRef}
-                        defaultValue={selected == null ? '' : selected.name}/>  
+                        ref={nameRef}/>  
                 </Form.Group>   
             </Col>
             <Col sm={12} md={6} lg={4}>
                 <Form.Group>
                     <Form.Label>Отчество:</Form.Label>
                     <Form.Control type='text' maxLength={50} placeholder='Введите отчество' 
-                        ref={patronymicRef}
-                        defaultValue={selected == null ? '' : selected.patronymic}/>  
+                        ref={patronymicRef}/>  
                 </Form.Group>   
             </Col>
             <Col sm={12} md={6} lg={4} style={{display: 'flex', flexDirection: 'column', justifyContent: 'end'}}>
