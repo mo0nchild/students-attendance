@@ -7,7 +7,7 @@ const PWAOptions: Partial<VitePWAOptions> = {
 	includeAssets: ["assets/*"],
 	manifest: {
         name: 'Проверка посещений студентов',
-        short_name: 'Rfid Reader',
+        short_name: 'Песещения',
         start_url: '/',
         background_color: '#ffffff',
         theme_color: '#000000',

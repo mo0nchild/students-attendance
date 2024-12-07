@@ -199,7 +199,7 @@ API-KEY: {{apiKey}}
 <> 2024-11-28T213937.200.json
 
 ###
-DELETE http://{{host}}/api/lesson/remove/3
+DELETE http://{{host}}/api/lesson/remove/4
 API-KEY: {{apiKey}}
 
 ###
@@ -208,9 +208,9 @@ Content-Type: application/json
 API-KEY: {{apiKey}}
 
 {
-  "id": 4,
+  "id": 5,
   "disciplineId": 1,
-  "theme": "Тест",
+  "theme": "Тест2",
   "time": "2015-09-21T23:12:00",
   "groupIds": [1, 2]
 }

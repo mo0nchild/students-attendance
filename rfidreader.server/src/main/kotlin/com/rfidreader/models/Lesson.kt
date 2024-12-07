@@ -23,4 +23,9 @@ data class Lesson (
 
     @ManyToMany(mappedBy = "lessons", fetch = FetchType.EAGER)
     var groups: MutableList<Group> = mutableListOf()
+
+    @PreRemove
+    private fun removeLessonFromGroup(): Unit {
+        for(it in groups) it.lessons.remove(this)
+    }
 }

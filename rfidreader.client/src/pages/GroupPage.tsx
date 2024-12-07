@@ -142,7 +142,7 @@ export default function GroupPage(): JSX.Element {
                 </Form.Group>   
             </Col>
         </Row>
-        <Row style={{margin: '10px 0px'}}>
+        <Row style={{margin: '10px 0px 20px'}}>
             <Col sm={6} md={6} lg={4}>
                 <Button style={{width: '100%'}} onClick={onApplyGroupHandler}>
                     { selected == null ? 'Добавить' : 'Обновить' }

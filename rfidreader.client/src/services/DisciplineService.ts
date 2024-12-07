@@ -6,6 +6,9 @@ class DisciplineService {
     public async getDisciplinesByLecturer(lecturerId: number): Promise<AxiosResponse<IDisciplineInfo[]>> {
         return await $api.get(`/discipline/getAll/lecturer/${lecturerId}`)
     }
+    public async getAllDisciplines(): Promise<AxiosResponse<IDisciplineInfo[]>> {
+        return await $api.get(`/discipline/getAll`)
+    }
     public async addDiscipline(discipline: INewDiscipline): Promise<AxiosResponse> {
         return await $api.post(`/discipline/add`, discipline)
     }   

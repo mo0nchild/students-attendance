@@ -1,5 +1,6 @@
 import Processing, { LoadingStatus } from "@components/processing/Processing";
 import { IDisciplineInfo } from "@core/models/discipline";
+import { getPreviousPagePath } from "@core/utils/routers";
 import { disciplineService } from "@services/DisciplineService";
 import { lecturerService } from "@services/LecturerService";
 import { AxiosError } from "axios";
@@ -7,15 +8,6 @@ import { createRef, CSSProperties, useCallback, useEffect, useState } from "reac
 import { Button, Col, Container, Dropdown, Form, ListGroup, Row } from "react-bootstrap";
 import { Link, useParams } from "react-router-dom";
 
-function getPreviousPagePath(): string {
-    const paths = document.referrer.split('/')
-    let result = ''
-    for(const item of paths.splice(3)) {
-        result = `${result}/${item}`
-    }
-    console.log(result)
-    return result
-}
 const disciplineNameRef = createRef<HTMLInputElement>()
 const updateCheckRef = createRef<HTMLInputElement>()
 

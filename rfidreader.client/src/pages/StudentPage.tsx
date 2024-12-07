@@ -1,6 +1,6 @@
 import ModalWindow from "@components/modal/ModalWindow"
 import Processing, { LoadingStatus } from "@components/processing/Processing"
-import CustomTable, { HeaderType } from "@components/table/CustomTable"
+import CustomTable, { DataType, HeaderType } from "@components/table/CustomTable"
 import { useScanner } from "@core/hooks/scanner"
 import { IGroupInfo } from "@core/models/group"
 import { IStudentInfo } from "@core/models/student"
@@ -33,9 +33,7 @@ const tableHeader: HeaderType[] = [
         name: 'Группа'
     },
 ]
-interface StudentTableInfo {
-    [key: string]: string | number
-    id: number
+interface StudentTableInfo extends DataType {
     surname: string
     name: string
     patronymic: string
@@ -47,7 +45,7 @@ const nameRef = createRef<HTMLInputElement>()
 const patronymicRef = createRef<HTMLInputElement>()
 const updateCheckRef = createRef<HTMLInputElement>()
 
-function convertLecturerToTableInfo(info: IStudentInfo): StudentTableInfo {
+function convertToTableInfo(info: IStudentInfo): StudentTableInfo {
     return {
         id: info.id,
         surname: info.surname,
@@ -71,8 +69,9 @@ export default function StudentPage(): JSX.Element {
     useEffect(() => {
         if(!groupId) throw 'Группа не указана'
         studentService.getStudentsByGroup(parseInt(groupId))
-            .then(item => {
-                setStudents(item.data.map(p => convertLecturerToTableInfo(p)))
+            .then(response => {
+                setStudents(response.data.map(p => convertToTableInfo(p)))
+                console.log(response.data)
                 setStatus('success') 
             })
             .catch(error => {

@@ -8,6 +8,14 @@ import DisciplinePage from '@pages/DisciplinePage';
 import LessonPage from '@pages/LessonPage';
 import GroupPage from '@pages/GroupPage';
 
+export function getPreviousPagePath(): string {
+    const paths = document.referrer.split('/')
+    let result = ''
+    for(const item of paths.splice(3)) {
+        result = `${result}/${item}`
+    }
+    return result
+}
 export const routers = createBrowserRouter([
     {
         path: '/',
@@ -30,7 +38,7 @@ export const routers = createBrowserRouter([
         element: createElement(DisciplinePage)
     }, 
     {
-        path: '/lessons/:discipline',
+        path: '/lessons/:disciplineId',
         element: createElement(LessonPage)
     }
 ])

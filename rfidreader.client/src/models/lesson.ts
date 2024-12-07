@@ -20,7 +20,7 @@ export interface IUpdateLesson {
     theme: string
     disciplineId: number
     time: string
-    groups: number[]
+    groupIds: number[]
 }
 export interface IStudentOnLesson {
     student: IStudentInfo

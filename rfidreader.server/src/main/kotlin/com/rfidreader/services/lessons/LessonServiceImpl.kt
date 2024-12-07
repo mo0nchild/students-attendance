@@ -46,7 +46,7 @@ open class LessonServiceImpl(
     @Transactional
     override fun deleteLesson(id: Long) {
         val entity = lessonRepository.findById(id).orElseThrow { ProcessException("Lesson not found") }
-        lessonRepository.delete(entity)
+        lessonRepository.deleteById(entity.id!!)
     }
     @Transactional
     override fun updateLesson(lesson: UpdateLesson) {
