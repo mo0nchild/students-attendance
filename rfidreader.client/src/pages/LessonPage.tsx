@@ -7,10 +7,9 @@ import { getPreviousPagePath } from "@core/utils/routers";
 import { disciplineService } from "@services/DisciplineService";
 import { groupService } from "@services/GroupService";
 import { lessonService } from "@services/LessonService";
-import { AxiosError } from "axios";
 import { createRef, CSSProperties, useCallback, useEffect, useState } from "react";
 import { Button, Col, Container, Form, ListGroup, Row } from "react-bootstrap";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 
 const tableHeader: HeaderType[] = [
     {
@@ -61,7 +60,8 @@ export default function LessonPage(): JSX.Element {
     const [ selectedGroups, setSelectedGroups ] = useState<IGroupInfo[] | null>(null)
     const [ editGroups, setEditGroups ] = useState<boolean>(false)
     const { disciplineId } = useParams()
-
+    
+    const navigate = useNavigate()
     useEffect(() => {
         if(!disciplineId) throw 'Не указан ИД дисциплины';
         (async() => {
@@ -203,7 +203,7 @@ export default function LessonPage(): JSX.Element {
                     contextMenu={[
                         {
                             name: 'Перейти к посещениям',
-                            onClick: (item) => console.log(item) 
+                            onClick: ({ id }) => navigate(`/attendance/${id}/${disciplineId}`)
                         },
                         {
                             name: 'Выбрать урок',

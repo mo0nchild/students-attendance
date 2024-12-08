@@ -221,7 +221,7 @@ Content-Type: application/json
 API-KEY: {{apiKey}}
 
 {
-  "lessonId": 4,
+  "lessonId": 5,
   "rfidCodes": [
     {
       "time": "2015-09-23T12:04",
@@ -238,7 +238,7 @@ API-KEY: {{apiKey}}
 <> 2024-11-28T230252.400.txt
 
 ###
-GET http://{{host}}/api/attendance/getAll/lesson/4
+GET http://{{host}}/api/attendance/getAll/lesson/5
 API-KEY: {{apiKey}}
 
 <> 2024-11-29T071351.200.json
@@ -256,7 +256,7 @@ API-KEY: {{apiKey}}
 <> 2024-11-28T231948.401.txt
 
 ###
-GET http://{{host}}/api/lesson/getInfo/4
+GET http://{{host}}/api/lesson/getInfo/5
 API-KEY: {{apiKey}}
 
 <> 2024-11-29T071409.200.json

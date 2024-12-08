@@ -20,4 +20,8 @@ data class Student (
 
     @OneToMany(mappedBy = "student", cascade = [CascadeType.ALL])
     var attendances: MutableList<Attendance> = mutableListOf()
+
+    override fun toString(): String {
+        return "$surname ${name[0]}. ${patronymic[0]}. ${group?.name} ${group?.faculty}"
+    }
 }

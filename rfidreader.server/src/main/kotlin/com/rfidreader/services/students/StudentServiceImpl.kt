@@ -26,7 +26,7 @@ class StudentServiceImpl(
             if(it.isNotEmpty()) throw ProcessException(it.first().message)
         }
         studentRepository.getStudentsByRfidCode(newStudent.rfidCode).let {
-            if(it.isNotEmpty()) throw ProcessException("RfidCode already exists")
+            if(it.isNotEmpty()) throw ProcessException("RfidCode already exists: ${it[0]}")
         }
         val entity = studentMapper.toStudentEntity(newStudent)
         studentRepository.saveWithGroup(entity, newStudent.groupId)
@@ -40,6 +40,9 @@ class StudentServiceImpl(
     override fun updateStudent(student: UpdateStudent) {
         validator.validate(student).let {
             if(it.isNotEmpty()) throw ProcessException(it.first().message)
+        }
+        studentRepository.getStudentsByRfidCode(student.rfidCode).let {
+            if(it.isNotEmpty()) throw ProcessException("RfidCode already exists: ${it[0]}")
         }
         val entity = studentRepository.findById(student.id)
             .orElseThrow { ProcessException("Student not found") }

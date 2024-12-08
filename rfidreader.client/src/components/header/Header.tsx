@@ -3,7 +3,7 @@ import style from './Header.module.css'
 import { useLocalStorage } from '@core/hooks/localstorage';
 
 export default function Header(): JSX.Element {
-    const [ auth, setAuth ] = useLocalStorage<number>('lecturerId', -1)
+    const [ auth ] = useLocalStorage<number>('lecturerId', -1)
     return (
     <div className={style.headerRoot}>
         <Navbar expand='md' className={style.headerMain}>

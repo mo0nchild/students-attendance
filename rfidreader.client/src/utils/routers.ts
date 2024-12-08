@@ -7,6 +7,7 @@ import LecturerPage from '@pages/LecturerPage';
 import DisciplinePage from '@pages/DisciplinePage';
 import LessonPage from '@pages/LessonPage';
 import GroupPage from '@pages/GroupPage';
+import AttendancePage from '@pages/AttendancePage';
 
 export function getPreviousPagePath(): string {
     const paths = document.referrer.split('/')
@@ -40,5 +41,9 @@ export const routers = createBrowserRouter([
     {
         path: '/lessons/:disciplineId',
         element: createElement(LessonPage)
+    },
+    {
+        path: '/attendance/:lessonId/:disciplineId',
+        element: createElement(AttendancePage)
     }
 ])

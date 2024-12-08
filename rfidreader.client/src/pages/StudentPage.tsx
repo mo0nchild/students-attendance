@@ -6,6 +6,7 @@ import { IGroupInfo } from "@core/models/group"
 import { IStudentInfo } from "@core/models/student"
 import { groupService } from "@services/GroupService"
 import { studentService } from "@services/StudentService"
+import { AxiosError } from "axios"
 import { createRef, CSSProperties, useCallback, useEffect, useState } from "react" 
 import { Button, Col, Container, Dropdown, Form, Row, Spinner } from "react-bootstrap"
 import { Link } from "react-router-dom"
@@ -126,7 +127,12 @@ export default function StudentPage(): JSX.Element {
             }
         }
         catch(error) {
-            alert('Ошибка выполнения запроса')
+            if(error instanceof AxiosError && typeof error.response?.data == 'string') {
+                if (error.response?.data.includes('RfidCode already exists:')) {
+                    alert(`Код пропуска уже зарегистрирован: ${error.response?.data.split(':')[1]}`)
+                }
+            }
+            else alert('Ошибка выполнения запроса')
             console.log(error)
         }
     }, [groupId, rfidValue, selected, selectedGroup])
@@ -253,6 +259,12 @@ export default function StudentPage(): JSX.Element {
             </Processing>
         </Row>
     </Container>
+    <ModalWindow isOpen={scanning} onClose={() => setScanning(false)}>
+        <div style={scannerModalStyle}>
+            <Spinner animation="grow" />
+            <p>Сканирование пропуска...</p>
+        </div>
+    </ModalWindow>
     <ModalWindow isOpen={scanning} onClose={() => setScanning(false)}>
         <div style={scannerModalStyle}>
             <Spinner animation="grow" />
