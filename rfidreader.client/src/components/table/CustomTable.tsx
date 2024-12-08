@@ -1,6 +1,6 @@
 import { Table } from "react-bootstrap";
 import style from './CustomTable.module.css'
-import { CSSProperties, useCallback, useEffect, useState } from "react";
+import { CSSProperties, useCallback, useEffect, useMemo, useState } from "react";
 
 type PropertyType = string | string[] | number
 export interface DataType {
@@ -22,17 +22,19 @@ export interface ICustomTableProps {
     header: HeaderType[]
     onClicked?: (data: DataType) => void
     contextMenu?: TableContextMenu[]
-    minSize?: number
+    tableMinSize?: number
 }
 type ContextPosition = { x: number, y: number }
 type TableRowClickedEvent = React.MouseEvent<HTMLElement, MouseEvent>
 
 const contextOffset = { offsetX: 10, offsetY: 30 }
-const tableMinSize = 5
+const tableMinSizeDefault = 5
 
 export default function CustomTable(props: ICustomTableProps): JSX.Element {
     const { data, header, contextMenu, onClicked } = props
-    const minSize = props.minSize == undefined ? tableMinSize : props.minSize
+    const minSize = useMemo(() => {
+        return props.tableMinSize == undefined ? tableMinSizeDefault : props.tableMinSize
+    }, [props.tableMinSize])
 
     const [ contextPosition, setContextPosition ] = useState<ContextPosition | null>(null)
     const [ selected, setSelected ] = useState<DataType | null>()

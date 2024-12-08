@@ -1,9 +1,10 @@
+import CustomListGroup from "@components/listgroup/CustomListGroup";
 import Processing, { LoadingStatus } from "@components/processing/Processing";
 import { useLocalStorage } from "@core/hooks/localstorage";
 import { ILecturerInfo } from "@core/models/lecturer";
 import { lecturerService } from "@services/LecturerService";
-import { CSSProperties, useCallback, useEffect, useState } from "react";
-import { Col, Container, Dropdown, Form, ListGroup, Row } from "react-bootstrap";
+import { useCallback, useEffect, useState } from "react";
+import { Col, Container, Form, Row } from "react-bootstrap";
 
 export default function HomePage(): JSX.Element {
     const [ auth, setAuth ] = useLocalStorage<number>('lecturerId', -1)
@@ -29,8 +30,13 @@ export default function HomePage(): JSX.Element {
             Добро пожаловать&nbsp;
             <span>{(() => {
                     if (lecturers == null || auth == -1) return ''
-                    const { name, patronymic, surname } = lecturers!.find(it => it.id == auth)!
-                    return `${surname} ${name[0]}. ${patronymic[0]}.`
+                    const response = lecturers!.find(it => it.id == auth)
+
+                    if (response == undefined) { setAuth(-1); return '' }
+                    return (() => {
+                        const { name, patronymic, surname } = response
+                        return `${surname} ${name[0]}. ${patronymic[0]}.`
+                    })()
                 })()}</span>
         </h1>
         <h4 className='mb-5'>
@@ -50,32 +56,21 @@ export default function HomePage(): JSX.Element {
         <Row className='justify-content-center'>
             <Col sm={12} md={8} lg={6}>
                 <Processing status={status}>
-                    <ListGroup>
-                    {
-                    lecturers?.filter(it => new RegExp(`${searchValue}`).exec(`${it.patronymic} ${it.name} ${it.surname}`))
-                        .map((item, index) => {
-                            const { surname, name, patronymic } = item
-                            return (
-                            <ListGroup.Item key={`listitem#${index}`}>
-                                <Dropdown>
-                                    <Dropdown.Toggle style={toggleStyle}>{`${surname} ${name} ${patronymic}`}</Dropdown.Toggle>
-                                    <Dropdown.Menu>
-                                        <Dropdown.Item onClick={() => onAuthClickHandler(item)}>Авторизоваться</Dropdown.Item>
-                                    </Dropdown.Menu>
-                                </Dropdown>
-                            </ListGroup.Item>
-                            )
-                        })
-                    }
-                    </ListGroup>
+                    <CustomListGroup<ILecturerInfo> 
+                        data={lecturers?.map(item => ({
+                            data: item,
+                            name: `${item.surname} ${item.name} ${item.patronymic}`
+                        }))} 
+                        menuItems={[
+                            {
+                                name: 'Авторизоваться',
+                                onClick: (item) => onAuthClickHandler(item)
+                            }
+                        ]} />
                 </Processing>
             </Col>
         </Row>
     </Container>
     </div>
     )
-}
-const toggleStyle: CSSProperties = {
-    background: 'transparent',
-    border: 'none'
 }

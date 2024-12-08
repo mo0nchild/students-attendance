@@ -1,3 +1,4 @@
+import CustomListGroup from "@components/listgroup/CustomListGroup";
 import Processing, { LoadingStatus } from "@components/processing/Processing";
 import { IDisciplineInfo } from "@core/models/discipline";
 import { getPreviousPagePath } from "@core/utils/routers";
@@ -5,8 +6,8 @@ import { disciplineService } from "@services/DisciplineService";
 import { lecturerService } from "@services/LecturerService";
 import { AxiosError } from "axios";
 import { createRef, CSSProperties, useCallback, useEffect, useState } from "react";
-import { Button, Col, Container, Dropdown, Form, ListGroup, Row } from "react-bootstrap";
-import { Link, useParams } from "react-router-dom";
+import { Button, Col, Container, Form, Row } from "react-bootstrap";
+import { Link, useNavigate, useParams } from "react-router-dom";
 
 const disciplineNameRef = createRef<HTMLInputElement>()
 const updateCheckRef = createRef<HTMLInputElement>()
@@ -18,6 +19,7 @@ export default function DisciplinePage(): JSX.Element {
     const [lecturer, setLecturer] = useState<string | null>(null)
     const [selected, setSelected] = useState<IDisciplineInfo | null>(null)
     
+    const navigator = useNavigate()
     const { lecturerId } = useParams()
     useEffect(() => {
         if(!lecturerId) throw 'Не указан ИД преподавателя';
@@ -33,11 +35,14 @@ export default function DisciplinePage(): JSX.Element {
         })()
             .then(() => setStatus('success'))
             .catch(error => {
+                if (typeof error == 'string' && error == 'Невозможно найти преподавателя по ИД') {
+                    navigator('/')
+                }
                 console.log(error)
                 setStatus('failed')
             })
             console.log()
-    }, [lecturerId, updateUuid])
+    }, [lecturerId, navigator, updateUuid])
     const onApplyDisciplineHandler = useCallback(async() => {
         const requestData = {
             name: disciplineNameRef.current!.value,
@@ -128,32 +133,22 @@ export default function DisciplinePage(): JSX.Element {
         </Row>
         <Row className='flex-grow-1'>
             <Processing status={status}>
-                <div>
-                    <ListGroup>
-                    {
-                    disciplines == null ? <div></div> : disciplines!.map((item, index) => {
-                        return (
-                        <ListGroup.Item key={`listgroup#${index}`}>
-                            <Dropdown>
-                                <Dropdown.Toggle style={toggleStyle}>{item.name}</Dropdown.Toggle>
-                                <Dropdown.Menu>
-                                    <Dropdown.Item href={`/lessons/${item.id}`}>
-                                        Перейти к урокам
-                                    </Dropdown.Item>
-                                    <Dropdown.Item onClick={() => onSelectDisciplineHandler(item)}>
-                                        Выбрать дисциплину
-                                    </Dropdown.Item>
-                                    <Dropdown.Item onClick={() => onRemoveDisciplineHandler(item.id)}>
-                                        Удалить дисциплину
-                                    </Dropdown.Item>
-                                </Dropdown.Menu>
-                            </Dropdown>
-                        </ListGroup.Item>
-                        )
-                    })
-                    }
-                    </ListGroup>
-                </div>
+                <CustomListGroup<IDisciplineInfo> 
+                    data={disciplines?.map(item => ({ data: item, name: `${item.name}`}) )} 
+                    menuItems={[
+                        {
+                            name: 'Перейти к урокам',
+                            onClick: (item) => navigator(`/lessons/${item.id}`)
+                        },
+                        {
+                            name: 'Выбрать дисциплину',
+                            onClick: (item) => onSelectDisciplineHandler(item)
+                        },
+                        {
+                            name: 'Удалить дисциплину',
+                            onClick: (item) => onRemoveDisciplineHandler(item.id)
+                        },
+                    ]} />
             </Processing>
         </Row>
     </Container>
@@ -167,8 +162,4 @@ const headerLinkStyle: CSSProperties = {
     color: 'white', 
     display: 'inline-block', 
     marginRight: '10px',
-}
-const toggleStyle: CSSProperties = {
-    background: 'transparent',
-    border: 'none'
 }

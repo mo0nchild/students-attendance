@@ -1,8 +1,10 @@
+import CustomListGroup from "@components/listgroup/CustomListGroup";
 import Processing, { LoadingStatus } from "@components/processing/Processing";
 import { ILecturerInfo } from "@core/models/lecturer";
 import { lecturerService } from "@services/LecturerService";
 import { createRef, CSSProperties, useCallback, useEffect, useState } from "react";
-import { Button, Col, Container, Dropdown, Form, ListGroup, Row } from "react-bootstrap";
+import { Button, Col, Container, Form, Row } from "react-bootstrap";
+import { useNavigate } from "react-router-dom";
 
 const surnameRef = createRef<HTMLInputElement>()
 const nameRef = createRef<HTMLInputElement>()
@@ -14,6 +16,7 @@ export default function LecturerPage(): JSX.Element {
     const [updateUuid, setUpdateUuid] = useState<string>(crypto.randomUUID())
     const [selected, setSelected] = useState<ILecturerInfo | null>(null)
     const [lecturers, setLecturers] = useState<ILecturerInfo[] | null>(null)
+    const navigator = useNavigate()
     useEffect(() => {
         lecturerService.getAllLecturers()
             .then(response => {
@@ -127,34 +130,22 @@ export default function LecturerPage(): JSX.Element {
         </Row>
         <Row className='flex-grow-1'>
             <Processing status={status}>
-                <div>
-                    <ListGroup>
-                    {
-                    lecturers == null ? <div></div> : lecturers!.map((item, index) => {
-                        return (
-                        <ListGroup.Item key={`listgroup#${index}`}>
-                            <Dropdown>
-                                <Dropdown.Toggle style={toggleStyle}>
-                                    { `${item.surname} ${item.name} ${item.patronymic}` }
-                                </Dropdown.Toggle>
-                                <Dropdown.Menu>
-                                    <Dropdown.Item href={`/disciplines/${item.id}`}>
-                                        Перейти к дисциплинам
-                                    </Dropdown.Item>
-                                    <Dropdown.Item onClick={() => onSelectLecturerHandler(item.id)}>
-                                        Выбрать преподавателя
-                                    </Dropdown.Item>
-                                    <Dropdown.Item onClick={() => onRemoveLecturerHandler(item.id)}>
-                                        Удалить преподавателя
-                                    </Dropdown.Item>
-                                </Dropdown.Menu>
-                            </Dropdown>
-                        </ListGroup.Item>
-                        )
-                    })
-                    }
-                    </ListGroup>
-                </div>
+                <CustomListGroup<ILecturerInfo> 
+                    data={lecturers?.map(item => ({ data: item, name: `${item.surname} ${item.name} ${item.patronymic}`}) )} 
+                    menuItems={[
+                        {
+                            name: 'Перейти к дисциплинам',
+                            onClick: (item) => navigator(`/disciplines/${item.id}`)
+                        },
+                        {
+                            name: 'Выбрать преподавателя',
+                            onClick: (item) => onSelectLecturerHandler(item.id)
+                        },
+                        {
+                            name: 'Удалить преподавателя',
+                            onClick: (item) => onRemoveLecturerHandler(item.id)
+                        },
+                    ]} />
             </Processing>
         </Row>
     </Container>
@@ -163,8 +154,4 @@ export default function LecturerPage(): JSX.Element {
 }
 const pageHeaderStyle: CSSProperties = {
     marginBottom: '14px',  
-}
-const toggleStyle: CSSProperties = {
-    background: 'transparent',
-    border: 'none'
 }

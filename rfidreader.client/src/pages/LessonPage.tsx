@@ -264,7 +264,11 @@ function GroupSelection(props: GroupSelectionProps): JSX.Element {
         <div className='mb-3' style={{maxHeight: '250px', overflowY: 'auto'}}>
             <h4>Выбрать группы:</h4>
             <Processing status={status}>
-                <ListGroup>
+            {
+                (groups?.length ?? 0) <= 0 ? <div className='d-flex justify-content-center my-4'>
+                    <h5 style={{fontWeight: 'normal'}}>Список пуст</h5>
+                </div>
+                    : <ListGroup>
                 {
                     groups == null ? null : groups?.map((item, index) => {
                         const { faculty, name, id } = item.info
@@ -282,6 +286,7 @@ function GroupSelection(props: GroupSelectionProps): JSX.Element {
                     })
                 }
                 </ListGroup>
+            }
             </Processing>
         </div>
         <Button className='w-100 mb-2' onClick={() => {

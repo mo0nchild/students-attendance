@@ -77,7 +77,11 @@ export default function GroupPage(): JSX.Element {
         setSelected(null)
     }
     const renderGroupsList = (): JSX.Element => {
-        if (groups == null || groups.length <= 0) return <div></div>
+        if (groups == null || groups.length <= 0) return (
+            <div className='d-flex flex-column align-items-center mt-5'>
+                <h4>Список групп пуст</h4>
+            </div>
+        )
         const result = groupBy(groups, item => item.faculty)
         return (
         <Accordion>
