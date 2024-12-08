@@ -85,7 +85,7 @@ export default function GroupPage(): JSX.Element {
         Object.keys(result).map((item, index) => {
             return (
             <Accordion.Item key={`item#${index}`} eventKey={index.toString()}>
-                { <Accordion.Header>{item}</Accordion.Header> }
+                <Accordion.Header>{item}</Accordion.Header>
                 <Accordion.Body>
                 <ListGroup>
                 {

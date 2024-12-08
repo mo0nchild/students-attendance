@@ -14,7 +14,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 const tableHeader: HeaderType[] = [
     {
         key: 'theme',
-        name: 'Тема урока'
+        name: 'Тема пары'
     }, 
     {
         key: 'groups',
@@ -147,7 +147,7 @@ export default function LessonPage(): JSX.Element {
             <Link style={headerLinkStyle} to={getPreviousPagePath()}>&#8592;&nbsp;
                 <span style={{textDecoration: 'underline', textUnderlineOffset: '5px'}}>Назад</span>
             </Link>
-            <h2 style={{display: 'inline-block'}}>Управление уроками [{discipline}]</h2>
+            <h2 style={{display: 'inline-block'}}>Управление парами [{discipline}]</h2>
         </div>
         <Row className='gy-2 gy-lg-3 gx-3 mb-2 justify-content-center'>
             <Col sm={12} md={6} lg={4}>

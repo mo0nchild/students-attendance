@@ -2,13 +2,14 @@ import ModalWindow from "@components/modal/ModalWindow";
 import Processing, { LoadingStatus } from "@components/processing/Processing";
 import CustomTable, { DataType, HeaderType } from "@components/table/CustomTable";
 import { useScanner } from "@core/hooks/scanner";
-import { INewAttendance } from "@core/models/attendance";
+import { IAttendanceInfo, INewAttendance } from "@core/models/attendance";
+import { IGroupInfo } from "@core/models/group";
 import { IStudentOnLesson } from "@core/models/lesson";
 import { getPreviousPagePath } from "@core/utils/routers";
 import { attendanceService } from "@services/AttendanceService";
 import { lessonService } from "@services/LessonService";
-import { CSSProperties, useCallback, useEffect, useRef, useState } from "react";
-import { Button, Col, Container, Row, Spinner } from "react-bootstrap";
+import { CSSProperties, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Accordion, Button, Col, Container, Dropdown, Row, Spinner } from "react-bootstrap";
 import { Link, useParams } from "react-router-dom";
 
 const tableHeader: HeaderType[] = [
@@ -29,7 +30,6 @@ const tableHeader: HeaderType[] = [
         }
     }
 ]
-
 interface AttendanceTableInfo extends DataType {
     studentFIO: string
     groupInfo: string
@@ -50,21 +50,32 @@ export default function AttendancePage(): JSX.Element {
     const [ status, setStatus ] = useState<LoadingStatus>('loading')
     const [ updateUuid, setUpdateUuid ] = useState<string>(crypto.randomUUID())
     const [ attendances, setAttendances ] = useState<IStudentOnLesson[] | null>()
+    
     const [ lesson, setLesson ] = useState<string | null>(null)
-
+    const [ lessonGroups, setLessonGroups ] = useState<IGroupInfo[] | null>(null)
+    
     const rfidCodes = useRef<RfidScannerInfo[]>([])
     const [ scanning, setScanning ] = useState<boolean>(false)
     const { lessonId, disciplineId } = useParams()
     useEffect(() => {
         if(!lessonId || !disciplineId) throw 'Не указан ИД занятия или дисциплины';
         (async() => {
-            setAttendances((await lessonService.getInfo(parseInt(lessonId))).data)
+            const attendancesResponse = (await lessonService.getInfo(parseInt(lessonId))).data
+            setAttendances(attendancesResponse)
+
             const lessonResponse = (await lessonService.getLessonsByDiscipline(parseInt(disciplineId!)))
                 .data.find(item => item.id == parseInt(lessonId))
             if (lessonResponse != undefined) {
                 setLesson(lessonResponse.theme)
             }
             else throw 'Занятие не найдено'
+            setLessonGroups((() => {
+                const groups: IGroupInfo[] = [] 
+                for(const { student } of attendancesResponse) {
+                    if(!groups.some(item => item.id == student.group.id)) groups.push(student.group)
+                }
+                return groups
+            })())
         })()
             .then(() => setStatus('success'))
             .catch(error => {
@@ -147,6 +158,10 @@ export default function AttendancePage(): JSX.Element {
                 })
         }
     }, [lessonId, scanning])
+    const attendanceAllProcent = useMemo<number | undefined>(() => {
+        return !attendances ? undefined 
+            : attendances?.filter(item => item.time != null).length / attendances.length
+    }, [attendances]) 
     return (
     <div>
     <Container fluid='md'>
@@ -169,6 +184,25 @@ export default function AttendancePage(): JSX.Element {
                 <Button style={{width: '100%'}} onClick={onRemoveAllAttendanceHandler}>
                     Удалить все посещения
                 </Button>
+            </Col>
+        </Row>
+        <Row className='gy-2 gy-lg-3 gx-3 mb-4 justify-content-center'>
+            <Col sm={12} md={6} lg={4}>
+                <AnalyticGroupInfo groupsList={lessonGroups} attendances={attendances}/>
+            </Col>
+            <Col sm={12} md={6} lg={4}>
+                <Accordion>
+                    <Accordion.Item eventKey='1'>
+                        <Accordion.Header>Общая статистика</Accordion.Header>
+                        <Accordion.Body className='d-flex flex-column gap-2'>
+                            <div style={{color: 'white'}}>
+                                <p className='m-0'>
+                                    Процент посещения пары: {((attendanceAllProcent ?? 0) * 100).toFixed(2)}%
+                                </p>
+                            </div>
+                        </Accordion.Body>
+                    </Accordion.Item>
+                </Accordion>
             </Col>
         </Row>
         <Row>
@@ -198,9 +232,7 @@ export default function AttendancePage(): JSX.Element {
         <div style={scannerModalStyle}>
             <Spinner animation="grow" />
             <p>Сканирование пропусков...</p>
-            <Button onClick={() => setScanning(false)}>
-                Зарегистрировать посещения
-            </Button>
+            <Button onClick={() => setScanning(false)}>Зарегистрировать посещения</Button>
         </div>
     </ModalWindow>
     </div>
@@ -233,4 +265,53 @@ function convertDateToString(date: Date): string {
     const minutes = String(date.getMinutes()).padStart(2, '0');
 
     return `${year}-${month}-${day}T${hours}:${minutes}`;
+}
+interface AnalyticGroupInfoProps {
+    groupsList: IGroupInfo[] | null
+    attendances: IStudentOnLesson[] | undefined | null
+}
+function AnalyticGroupInfo({ groupsList, attendances } : AnalyticGroupInfoProps): JSX.Element {
+    const [ analyticGroup, setAnalyticGroup ] = useState<IGroupInfo | null>(null)
+    const selectedGroupName = useMemo(() => {
+        return analyticGroup == null ? 'Выберите группу' : (() => {
+            const { name, faculty } = analyticGroup
+            return `${faculty} ${name}`
+        })()
+    }, [analyticGroup])
+    const shitValue = useMemo(() => {
+        const filtered = attendances?.filter(({student}) => student.group.id == analyticGroup?.id)
+        return filtered ? { 
+            value: filtered?.filter(({time}) => time != null).length / filtered?.length
+        } : undefined
+    }, [analyticGroup, attendances])
+    return(
+    <div>
+    <Accordion defaultActiveKey={null} onSelect={item => {if(item == null) setAnalyticGroup(null)}}>
+        <Accordion.Item eventKey='0'>
+            <Accordion.Header>Статистика по группам</Accordion.Header>
+            <Accordion.Body className='d-flex flex-column gap-4'>
+                <Dropdown>
+                    <Dropdown.Toggle className='w-100'>{selectedGroupName}</Dropdown.Toggle>
+                    <Dropdown.Menu>
+                    {
+                        groupsList?.map((item, index) => {
+                            const { faculty, name } = item
+                            return (
+                            <Dropdown.Item key={`lesson-group#${index}`} onClick={() => setAnalyticGroup(item)}>
+                                {`${faculty} ${name}`}
+                            </Dropdown.Item>
+                            )
+                        })
+                    }
+                    </Dropdown.Menu>
+                </Dropdown>
+                <div style={{color: 'white'}}>
+                { !shitValue || analyticGroup == null ? <></> 
+                    : <p className='m-0'>Посещения от группы: {(shitValue.value * 100).toFixed(2)}%</p> }
+                </div>
+            </Accordion.Body>
+        </Accordion.Item>
+    </Accordion>
+    </div>
+    )
 }
