@@ -3,13 +3,12 @@ import Processing, { LoadingStatus } from "@components/processing/Processing";
 import CustomTable, { DataType, HeaderType } from "@components/table/CustomTable";
 import { IGroupInfo } from "@core/models/group";
 import { ILessonInfo } from "@core/models/lesson";
-import { getPreviousPagePath } from "@core/utils/routers";
 import { disciplineService } from "@services/DisciplineService";
 import { groupService } from "@services/GroupService";
 import { lessonService } from "@services/LessonService";
 import { createRef, CSSProperties, useCallback, useEffect, useState } from "react";
 import { Button, Col, Container, Form, ListGroup, Row } from "react-bootstrap";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { v4 as uuidv4 } from 'uuid'
 
 const tableHeader: HeaderType[] = [
@@ -109,7 +108,7 @@ export default function LessonPage(): JSX.Element {
                     groupIds: selectedGroups!.map(it => it.id)
                 })
             if(response.status == 200) {
-                alert('Запрос успешно выполнен')
+                
                 setUpdateUuid(uuidv4())
                 clearInputForm()
             }
@@ -122,7 +121,7 @@ export default function LessonPage(): JSX.Element {
     const onRemoveLessonHandler = useCallback(async(id: number) => {
         try {
             if ((await lessonService.removeLesson(id)).status == 200) {
-                alert('Запрос успешно выполнен')
+                
                 setUpdateUuid(uuidv4())
                 clearInputForm()
             }
@@ -145,9 +144,9 @@ export default function LessonPage(): JSX.Element {
     <div>
     <Container fluid='md'>
         <div style={pageHeaderStyle}>
-            <Link style={headerLinkStyle} to={getPreviousPagePath()}>&#8592;&nbsp;
+            <a style={headerLinkStyle} onClick={() => navigate(-1)}>&#8592;&nbsp;
                 <span style={{textDecoration: 'underline', textUnderlineOffset: '5px'}}>Назад</span>
-            </Link>
+            </a>
             <h2 style={{display: 'inline-block'}}>Управление парами [{discipline}]</h2>
         </div>
         <Row className='gy-2 gy-lg-3 gx-3 mb-2 justify-content-center'>

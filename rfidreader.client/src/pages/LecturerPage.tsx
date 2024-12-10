@@ -42,7 +42,7 @@ export default function LecturerPage(): JSX.Element {
                     ...requestData
                 })
             if(response.status == 200) {
-                alert('Запрос успешно выполнен')
+                
                 setUpdateUuid(uuidv4())
                 clearInputForm()
             }
@@ -63,7 +63,7 @@ export default function LecturerPage(): JSX.Element {
     const onRemoveLecturerHandler = useCallback(async(id: number) => {
         try {
             if((await lecturerService.removeLecturer(id)).status == 200) {
-                alert('Запрос успешно выполнен')
+                
                 setUpdateUuid(uuidv4())
                 clearInputForm()
             }

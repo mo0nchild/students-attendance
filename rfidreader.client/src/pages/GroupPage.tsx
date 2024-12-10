@@ -46,7 +46,7 @@ export default function GroupPage(): JSX.Element {
                     id: selected.id
                 })
             if (response.status == 200) {
-                alert('Запрос успешно выполнен')
+                
                 setUpdateUuid(uuidv4())
                 clearInputForm()
             }
@@ -59,7 +59,7 @@ export default function GroupPage(): JSX.Element {
     const onRemoveGroupHandler = useCallback(async (group: IGroupInfo) => {
         try {
             if((await groupService.removeGroup(group.id)).status == 200) {
-                alert('Запрос успешно выполнен')
+                
                 setUpdateUuid(uuidv4())
                 clearInputForm()
             }

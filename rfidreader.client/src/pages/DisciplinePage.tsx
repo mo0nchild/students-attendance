@@ -1,13 +1,12 @@
 import CustomListGroup from "@components/listgroup/CustomListGroup";
 import Processing, { LoadingStatus } from "@components/processing/Processing";
 import { IDisciplineInfo } from "@core/models/discipline";
-import { getPreviousPagePath } from "@core/utils/routers";
 import { disciplineService } from "@services/DisciplineService";
 import { lecturerService } from "@services/LecturerService";
 import { AxiosError } from "axios";
 import { createRef, CSSProperties, useCallback, useEffect, useState } from "react";
 import { Button, Col, Container, Form, Row } from "react-bootstrap";
-import { Link, useNavigate, useParams } from "react-router-dom"
+import { useNavigate, useParams } from "react-router-dom"
 import { v4 as uuidv4 } from 'uuid'
 
 const disciplineNameRef = createRef<HTMLInputElement>()
@@ -56,7 +55,7 @@ export default function DisciplinePage(): JSX.Element {
                     ...requestData
                 })
             if(response.status == 200) {
-                alert('Запрос успешно выполнен')
+                
                 setUpdateUuid(uuidv4())
                 clearInputForm()
             }
@@ -80,7 +79,7 @@ export default function DisciplinePage(): JSX.Element {
     const onRemoveDisciplineHandler = useCallback(async(id: number) => {
         try {
             if((await disciplineService.removeDiscipline(id)).status == 200) {
-                alert('Запрос успешно выполнен')
+                
                 setUpdateUuid(uuidv4())
                 clearInputForm()
             }
@@ -101,9 +100,9 @@ export default function DisciplinePage(): JSX.Element {
     <div className='h-100'>
     <Container fluid='md' className='h-100 d-flex flex-column'>
         <div style={pageHeaderStyle}>
-            <Link style={headerLinkStyle} to={getPreviousPagePath()}>&#8592;&nbsp;
+            <a style={headerLinkStyle} onClick={() => navigator(-1)}>&#8592;&nbsp;
                 <span style={{textDecoration: 'underline', textUnderlineOffset: '5px'}}>Назад</span>
-            </Link>
+            </a>
             <h2 style={{display: 'inline-block'}}>Управление дисциплинами [{`${lecturer}`}]</h2>
         </div>
         <Row className='gy-2 gy-lg-3 gx-3'>

@@ -5,12 +5,11 @@ import { useScanner } from "@core/hooks/scanner";
 import { INewAttendance } from "@core/models/attendance";
 import { IGroupInfo } from "@core/models/group";
 import { IStudentOnLesson } from "@core/models/lesson";
-import { getPreviousPagePath } from "@core/utils/routers";
 import { attendanceService } from "@services/AttendanceService";
 import { lessonService } from "@services/LessonService";
 import { CSSProperties, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Accordion, Button, Col, Container, Dropdown, Row, Spinner } from "react-bootstrap";
-import { Link, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { v4 as uuidv4 } from 'uuid'
 
 const tableHeader: HeaderType[] = [
@@ -58,6 +57,7 @@ export default function AttendancePage(): JSX.Element {
     const rfidCodes = useRef<RfidScannerInfo[]>([])
     const [ scanning, setScanning ] = useState<boolean>(false)
     const { lessonId, disciplineId } = useParams()
+    const navigate = useNavigate()
     useEffect(() => {
         if(!lessonId || !disciplineId) throw 'Не указан ИД занятия или дисциплины';
         (async() => {
@@ -88,7 +88,7 @@ export default function AttendancePage(): JSX.Element {
         const { student } = attendances!.find(it => it.student.id == id)!
         try {
             if ((await attendanceService.removeAttendance(student.rfidCode, parseInt(lessonId!))).status == 200) {
-                alert('Запрос успешно выполнен')
+                
                 setUpdateUuid(uuidv4())
             }
         }
@@ -110,7 +110,6 @@ export default function AttendancePage(): JSX.Element {
         }
         try {
             if ((await attendanceService.addAttendances(request)).status == 200) {
-                alert('Запрос успешно выполнен')
                 setUpdateUuid(uuidv4())
             }
         }
@@ -122,7 +121,6 @@ export default function AttendancePage(): JSX.Element {
     const onRemoveAllAttendanceHandler = useCallback(async () => {
         try {
             if ((await attendanceService.removeAllAttendances(parseInt(lessonId!))).status == 200) {
-                alert('Запрос успешно выполнен')
                 setUpdateUuid(uuidv4())
             }
         }
@@ -167,9 +165,9 @@ export default function AttendancePage(): JSX.Element {
     <div>
     <Container fluid='md'>
         <div style={pageHeaderStyle}>
-            <Link style={headerLinkStyle} to={getPreviousPagePath()}>&#8592;&nbsp;
+            <a style={headerLinkStyle} onClick={() => navigate(-1)}>&#8592;&nbsp;
                 <span style={{textDecoration: 'underline', textUnderlineOffset: '5px'}}>Назад</span>
-            </Link>
+            </a>
             <h2 style={{display: 'inline-block'}}>Управление занятием [{lesson}]</h2>
         </div>
         <Row className='gy-2 gy-lg-3 gx-3 mb-4 justify-content-center'>

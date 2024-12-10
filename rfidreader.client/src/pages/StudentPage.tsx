@@ -9,7 +9,7 @@ import { studentService } from "@services/StudentService"
 import { AxiosError } from "axios"
 import { createRef, CSSProperties, useCallback, useEffect, useState } from "react" 
 import { Button, Col, Container, Dropdown, Form, Row, Spinner } from "react-bootstrap"
-import { Link } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import { useParams } from "react-router-dom"
 import { v4 as uuidv4 } from 'uuid'
 
@@ -68,6 +68,7 @@ export default function StudentPage(): JSX.Element {
     const [ selectedGroup, setSelectedGroup ] = useState<IGroupInfo | null>(null)
     const [ updateUuid, setUpdateUuid ] = useState<string>(uuidv4())
     const { groupId, groupName } = useParams();
+    const navigate = useNavigate()
     useEffect(() => {
         if(!groupId) throw 'Группа не указана'
         studentService.getStudentsByGroup(parseInt(groupId))
@@ -169,9 +170,9 @@ export default function StudentPage(): JSX.Element {
     <div>
     <Container fluid='sm'>
         <div style={pageHeaderStyle}>
-            <Link style={headerLinkStyle} to={'/groups'}>&#8592;&nbsp;
+            <a style={headerLinkStyle} onClick={() => navigate(-1)}>&#8592;&nbsp;
                 <span style={{textDecoration: 'underline', textUnderlineOffset: '5px'}}>Назад</span>
-            </Link>
+            </a>
             <h2 style={{display: 'inline-block'}}>Управление студентами [{groupName}]</h2>
         </div>
         <Row className='gy-2 gy-lg-3 gx-3'>
