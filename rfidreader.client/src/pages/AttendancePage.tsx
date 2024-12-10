@@ -11,6 +11,7 @@ import { lessonService } from "@services/LessonService";
 import { CSSProperties, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Accordion, Button, Col, Container, Dropdown, Row, Spinner } from "react-bootstrap";
 import { Link, useParams } from "react-router-dom";
+import { v4 as uuidv4 } from 'uuid'
 
 const tableHeader: HeaderType[] = [
     {
@@ -48,7 +49,7 @@ type RfidScannerInfo = { code: string, time: Date }
 
 export default function AttendancePage(): JSX.Element {
     const [ status, setStatus ] = useState<LoadingStatus>('loading')
-    const [ updateUuid, setUpdateUuid ] = useState<string>(crypto.randomUUID())
+    const [ updateUuid, setUpdateUuid ] = useState<string>(uuidv4())
     const [ attendances, setAttendances ] = useState<IStudentOnLesson[] | null>()
     
     const [ lesson, setLesson ] = useState<string | null>(null)
@@ -88,7 +89,7 @@ export default function AttendancePage(): JSX.Element {
         try {
             if ((await attendanceService.removeAttendance(student.rfidCode, parseInt(lessonId!))).status == 200) {
                 alert('Запрос успешно выполнен')
-                setUpdateUuid(crypto.randomUUID())
+                setUpdateUuid(uuidv4())
             }
         }
         catch(error) {
@@ -110,7 +111,7 @@ export default function AttendancePage(): JSX.Element {
         try {
             if ((await attendanceService.addAttendances(request)).status == 200) {
                 alert('Запрос успешно выполнен')
-                setUpdateUuid(crypto.randomUUID())
+                setUpdateUuid(uuidv4())
             }
         }
         catch(error) {
@@ -122,7 +123,7 @@ export default function AttendancePage(): JSX.Element {
         try {
             if ((await attendanceService.removeAllAttendances(parseInt(lessonId!))).status == 200) {
                 alert('Запрос успешно выполнен')
-                setUpdateUuid(crypto.randomUUID())
+                setUpdateUuid(uuidv4())
             }
         }
         catch(error) {
@@ -150,7 +151,7 @@ export default function AttendancePage(): JSX.Element {
             })
                 .then(() => {
                     alert('Запрос выполнен успешно')
-                    setUpdateUuid(crypto.randomUUID())
+                    setUpdateUuid(uuidv4())
                 })
                 .catch(error => {
                     console.log(error)

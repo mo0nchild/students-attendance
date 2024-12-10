@@ -4,6 +4,7 @@ import { groupBy } from "@core/utils/processing"
 import { groupService } from "@services/GroupService"
 import { createElement, createRef, CSSProperties, useCallback, useEffect, useState } from "react"
 import { Accordion, Button, Col, Container, Dropdown, Form, ListGroup, Row } from "react-bootstrap"
+import { v4 as uuidv4 } from 'uuid'
 
 const groupNameRef = createRef<HTMLInputElement>()
 const facultyRef = createRef<HTMLInputElement>()
@@ -13,7 +14,7 @@ export default function GroupPage(): JSX.Element {
     const [groups, setGroups] = useState<IGroupInfo[] | null>(null)
     const [selected, setSelected] = useState<IGroupInfo | null>(null)
     const [status, setStatus] = useState<LoadingStatus>('loading')
-    const [updateUuid, setUpdateUuid] = useState<string>(crypto.randomUUID())
+    const [updateUuid, setUpdateUuid] = useState<string>(uuidv4())
     useEffect(() => {
         groupService.getAllGroups()
             .then(({data}) => {
@@ -46,7 +47,7 @@ export default function GroupPage(): JSX.Element {
                 })
             if (response.status == 200) {
                 alert('Запрос успешно выполнен')
-                setUpdateUuid(crypto.randomUUID())
+                setUpdateUuid(uuidv4())
                 clearInputForm()
             }
         }
@@ -59,7 +60,7 @@ export default function GroupPage(): JSX.Element {
         try {
             if((await groupService.removeGroup(group.id)).status == 200) {
                 alert('Запрос успешно выполнен')
-                setUpdateUuid(crypto.randomUUID())
+                setUpdateUuid(uuidv4())
                 clearInputForm()
             }
         }

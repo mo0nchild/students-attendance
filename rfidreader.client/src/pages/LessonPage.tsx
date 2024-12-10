@@ -10,6 +10,7 @@ import { lessonService } from "@services/LessonService";
 import { createRef, CSSProperties, useCallback, useEffect, useState } from "react";
 import { Button, Col, Container, Form, ListGroup, Row } from "react-bootstrap";
 import { Link, useNavigate, useParams } from "react-router-dom";
+import { v4 as uuidv4 } from 'uuid'
 
 const tableHeader: HeaderType[] = [
     {
@@ -55,7 +56,7 @@ export default function LessonPage(): JSX.Element {
     
     const [ discipline, setDiscipline ] = useState<string | null>(null)
     const [ status, setStatus ] = useState<LoadingStatus>('loading')
-    const [ updateUuid, setUpdateUuid ] = useState<string>(crypto.randomUUID())
+    const [ updateUuid, setUpdateUuid ] = useState<string>(uuidv4())
 
     const [ selectedGroups, setSelectedGroups ] = useState<IGroupInfo[] | null>(null)
     const [ editGroups, setEditGroups ] = useState<boolean>(false)
@@ -109,7 +110,7 @@ export default function LessonPage(): JSX.Element {
                 })
             if(response.status == 200) {
                 alert('Запрос успешно выполнен')
-                setUpdateUuid(crypto.randomUUID())
+                setUpdateUuid(uuidv4())
                 clearInputForm()
             }
         }
@@ -122,7 +123,7 @@ export default function LessonPage(): JSX.Element {
         try {
             if ((await lessonService.removeLesson(id)).status == 200) {
                 alert('Запрос успешно выполнен')
-                setUpdateUuid(crypto.randomUUID())
+                setUpdateUuid(uuidv4())
                 clearInputForm()
             }
         }

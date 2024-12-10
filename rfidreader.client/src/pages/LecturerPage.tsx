@@ -5,6 +5,7 @@ import { lecturerService } from "@services/LecturerService";
 import { createRef, CSSProperties, useCallback, useEffect, useState } from "react";
 import { Button, Col, Container, Form, Row } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
+import { v4 as uuidv4 } from 'uuid'
 
 const surnameRef = createRef<HTMLInputElement>()
 const nameRef = createRef<HTMLInputElement>()
@@ -13,7 +14,7 @@ const updateCheckRef = createRef<HTMLInputElement>()
 
 export default function LecturerPage(): JSX.Element {
     const [status, setStatus] = useState<LoadingStatus>('loading')
-    const [updateUuid, setUpdateUuid] = useState<string>(crypto.randomUUID())
+    const [updateUuid, setUpdateUuid] = useState<string>(uuidv4())
     const [selected, setSelected] = useState<ILecturerInfo | null>(null)
     const [lecturers, setLecturers] = useState<ILecturerInfo[] | null>(null)
     const navigator = useNavigate()
@@ -42,7 +43,7 @@ export default function LecturerPage(): JSX.Element {
                 })
             if(response.status == 200) {
                 alert('Запрос успешно выполнен')
-                setUpdateUuid(crypto.randomUUID())
+                setUpdateUuid(uuidv4())
                 clearInputForm()
             }
         }
@@ -63,7 +64,7 @@ export default function LecturerPage(): JSX.Element {
         try {
             if((await lecturerService.removeLecturer(id)).status == 200) {
                 alert('Запрос успешно выполнен')
-                setUpdateUuid(crypto.randomUUID())
+                setUpdateUuid(uuidv4())
                 clearInputForm()
             }
         }

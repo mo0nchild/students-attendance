@@ -7,14 +7,15 @@ import { lecturerService } from "@services/LecturerService";
 import { AxiosError } from "axios";
 import { createRef, CSSProperties, useCallback, useEffect, useState } from "react";
 import { Button, Col, Container, Form, Row } from "react-bootstrap";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom"
+import { v4 as uuidv4 } from 'uuid'
 
 const disciplineNameRef = createRef<HTMLInputElement>()
 const updateCheckRef = createRef<HTMLInputElement>()
 
 export default function DisciplinePage(): JSX.Element {
     const [status, setStatus] = useState<LoadingStatus>('loading')
-    const [updateUuid, setUpdateUuid] = useState<string>(crypto.randomUUID())
+    const [updateUuid, setUpdateUuid] = useState<string>(uuidv4())
     const [disciplines, setDisciplines] = useState<IDisciplineInfo[] | null>(null)
     const [lecturer, setLecturer] = useState<string | null>(null)
     const [selected, setSelected] = useState<IDisciplineInfo | null>(null)
@@ -56,7 +57,7 @@ export default function DisciplinePage(): JSX.Element {
                 })
             if(response.status == 200) {
                 alert('Запрос успешно выполнен')
-                setUpdateUuid(crypto.randomUUID())
+                setUpdateUuid(uuidv4())
                 clearInputForm()
             }
         }
@@ -80,7 +81,7 @@ export default function DisciplinePage(): JSX.Element {
         try {
             if((await disciplineService.removeDiscipline(id)).status == 200) {
                 alert('Запрос успешно выполнен')
-                setUpdateUuid(crypto.randomUUID())
+                setUpdateUuid(uuidv4())
                 clearInputForm()
             }
         }

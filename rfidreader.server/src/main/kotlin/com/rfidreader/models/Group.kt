@@ -17,4 +17,9 @@ data class Group (
 
     @ManyToMany(cascade = [CascadeType.ALL], fetch = FetchType.EAGER)
     var lessons: MutableList<Lesson> = mutableListOf()
+
+    @PreRemove
+    private fun removeGroupFromLesson(): Unit {
+        for(it in lessons) it.groups.remove(this)
+    }
 }

@@ -25,7 +25,7 @@ API-KEY: {{apiKey}}
 <> 2024-11-27T184549.200.json
 
 ###
-DELETE http://{{host}}/api/group/remove/3
+DELETE http://{{host}}/api/group/remove/7
 API-KEY: {{apiKey}}
 
 <> 2024-11-27T190705.400.txt

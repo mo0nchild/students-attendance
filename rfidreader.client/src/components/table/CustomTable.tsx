@@ -1,6 +1,7 @@
 import { Table } from "react-bootstrap";
 import style from './CustomTable.module.css'
 import { CSSProperties, useCallback, useEffect, useMemo, useState } from "react";
+import { v4 as uuidv4 } from 'uuid'
 
 type PropertyType = string | string[] | number
 export interface DataType {
@@ -71,7 +72,7 @@ export default function CustomTable(props: ICustomTableProps): JSX.Element {
         <thead>
             <tr>{ header.map((item, index) => <th key={`table-header#${index}`}>{item.name}</th>) }</tr>
         </thead>
-        <tbody key={crypto.randomUUID()}>
+        <tbody key={uuidv4()}>
         {
         data.map((item, index) => {
             return (

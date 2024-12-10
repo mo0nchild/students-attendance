@@ -11,6 +11,7 @@ import { createRef, CSSProperties, useCallback, useEffect, useState } from "reac
 import { Button, Col, Container, Dropdown, Form, Row, Spinner } from "react-bootstrap"
 import { Link } from "react-router-dom"
 import { useParams } from "react-router-dom"
+import { v4 as uuidv4 } from 'uuid'
 
 const tableHeader: HeaderType[] = [
     {
@@ -65,7 +66,7 @@ export default function StudentPage(): JSX.Element {
 
     const [ groups, setGroups ] = useState<IGroupInfo[]>()
     const [ selectedGroup, setSelectedGroup ] = useState<IGroupInfo | null>(null)
-    const [ updateUuid, setUpdateUuid ] = useState<string>(crypto.randomUUID())
+    const [ updateUuid, setUpdateUuid ] = useState<string>(uuidv4())
     const { groupId, groupName } = useParams();
     useEffect(() => {
         if(!groupId) throw 'Группа не указана'
@@ -122,7 +123,7 @@ export default function StudentPage(): JSX.Element {
             })
             if (response.status == 200) {
                 alert('Запрос успешно выполнен')
-                setUpdateUuid(crypto.randomUUID())
+                setUpdateUuid(uuidv4())
                 clearInputForm()
             }
         }
@@ -140,7 +141,7 @@ export default function StudentPage(): JSX.Element {
         if(selected != null) {
             if ((await studentService.removeStudent(selected.id)).status == 200) {
                 alert('Запрос успешно выполнен')
-                setUpdateUuid(crypto.randomUUID())
+                setUpdateUuid(uuidv4())
                 clearInputForm()
             }
         }
