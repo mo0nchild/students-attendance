@@ -1,6 +1,7 @@
 import { AliasOptions, defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA, VitePWAOptions } from 'vite-plugin-pwa'
+import mkcert from 'vite-plugin-mkcert'
 import path from 'path'
 
 const PWAOptions: Partial<VitePWAOptions> = { 
@@ -67,7 +68,8 @@ const pathAlias: AliasOptions = [
 export default defineConfig({
 	plugins: [
 		react(),
-		VitePWA(PWAOptions)
+		VitePWA(PWAOptions),
+		mkcert()
 	],
 	resolve: {
 		alias: pathAlias
