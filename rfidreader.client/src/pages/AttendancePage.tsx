@@ -2,7 +2,7 @@ import ModalWindow from "@components/modal/ModalWindow";
 import Processing, { LoadingStatus } from "@components/processing/Processing";
 import CustomTable, { DataType, HeaderType } from "@components/table/CustomTable";
 import { useScanner } from "@core/hooks/scanner";
-import { IAttendanceInfo, INewAttendance } from "@core/models/attendance";
+import { INewAttendance } from "@core/models/attendance";
 import { IGroupInfo } from "@core/models/group";
 import { IStudentOnLesson } from "@core/models/lesson";
 import { getPreviousPagePath } from "@core/utils/routers";
