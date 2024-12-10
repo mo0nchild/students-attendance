@@ -49,7 +49,9 @@ export default function HomePage(): JSX.Element {
                 <Form.Group>
                     <Form.Label>Поиск преподавателя:</Form.Label>
                     <Form.Control type='text' maxLength={50} placeholder='Введите ФИО преподавателя' 
-                        onChange={event => setSearchValue(event.currentTarget.value)}/>  
+                        onChange={event => {
+                            setSearchValue(event.currentTarget.value)
+                        }}/>  
                 </Form.Group> 
             </Col>
         </Row>
@@ -57,10 +59,14 @@ export default function HomePage(): JSX.Element {
             <Col sm={12} md={8} lg={6}>
                 <Processing status={status}>
                     <CustomListGroup<ILecturerInfo> 
-                        data={lecturers?.map(item => ({
-                            data: item,
-                            name: `${item.surname} ${item.name} ${item.patronymic}`
-                        }))} 
+                        data={lecturers?.filter(item => {
+                            const { patronymic, name, surname } = item
+                            return (new RegExp(`${searchValue}`)).exec(`${patronymic} ${name} ${surname}`)
+                        })
+                            .map(item => ({
+                                data: item,
+                                name: `${item.surname} ${item.name} ${item.patronymic}`
+                            }))} 
                         menuItems={[
                             {
                                 name: 'Авторизоваться',
