@@ -69,9 +69,9 @@ export default function GroupPage(): JSX.Element {
         }
     }, [])
     useEffect(() => {
-        groupNameRef.current!.value = selected == null ? '' : selected.name
-        facultyRef.current!.value = selected == null ? '' : selected.faculty
-    }, [selected])
+        groupNameRef.current!.value = (selected == null ? '' : selected.name)
+        facultyRef.current!.value = (selected == null ? '' : selected.faculty)
+    }, [selected, updateUuid])
     const clearInputForm = () => {
         updateCheckRef.current!.checked = false
         setSelected(null)

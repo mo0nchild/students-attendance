@@ -135,7 +135,7 @@ export default function LessonPage(): JSX.Element {
         themeRef.current!.value = selected == null ? '' : selected.theme
         timeRef.current!.value = selected == null ? '' : selected.time
         if (selected == null) setSelectedGroups(null)
-    }, [selected])
+    }, [selected, updateUuid])
     const clearInputForm = () => {
         updateCheckRef.current!.checked = false
         setSelected(null)

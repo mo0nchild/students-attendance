@@ -76,7 +76,7 @@ export default function LecturerPage(): JSX.Element {
         surnameRef.current!.value = selected == null ? '' : selected.surname
         nameRef.current!.value = selected == null ? '' : selected.name
         patronymicRef.current!.value = selected == null ? '' : selected.patronymic
-    }, [selected])
+    }, [selected, updateUuid])
     const clearInputForm = () => {
         updateCheckRef.current!.checked = false
         setSelected(null)

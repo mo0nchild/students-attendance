@@ -91,7 +91,7 @@ export default function DisciplinePage(): JSX.Element {
     }, [])
     useEffect(() => {
         disciplineNameRef.current!.value = selected == null ? '' : selected.name
-    }, [selected])
+    }, [selected, updateUuid])
     const clearInputForm = () => {
         updateCheckRef.current!.checked = false
         setSelected(null)
