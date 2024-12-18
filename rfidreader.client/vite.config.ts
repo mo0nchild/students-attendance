@@ -1,7 +1,7 @@
 import { AliasOptions, defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA, VitePWAOptions } from 'vite-plugin-pwa'
-import mkcert from 'vite-plugin-mkcert'
+import fs from 'fs'
 import path from 'path'
 
 const PWAOptions: Partial<VitePWAOptions> = { 
@@ -69,9 +69,14 @@ export default defineConfig({
 	plugins: [
 		react(),
 		VitePWA(PWAOptions),
-		mkcert()
 	],
+	server: {
+		https: {
+			key: fs.readFileSync(path.resolve(__dirname, 'certificates/localhost_key.pem')),
+			cert: fs.readFileSync(path.resolve(__dirname, 'certificates/localhost_cert.pem')),
+		},
+	},
 	resolve: {
 		alias: pathAlias
-	},
+	}
 })
