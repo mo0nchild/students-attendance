@@ -22,6 +22,7 @@ export default function HomePage(): JSX.Element {
     }, [auth])
     const onAuthClickHandler = useCallback((lecturer: ILecturerInfo) => {
         setAuth(lecturer.id)
+        window.location.reload()
     }, [setAuth])
     return (
     <div>

@@ -150,6 +150,7 @@ export default function LecturerPage(): JSX.Element {
             </Processing>
         </Row>
     </Container>
+
     </div>
     )
 }

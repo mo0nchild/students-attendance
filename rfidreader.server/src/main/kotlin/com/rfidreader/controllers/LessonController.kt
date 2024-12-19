@@ -1,6 +1,7 @@
 package com.rfidreader.controllers
 
 import com.rfidreader.services.lessons.LessonService
+import com.rfidreader.services.lessons.models.GroupAttendancesOnLesson
 import com.rfidreader.services.lessons.models.LessonDto
 import com.rfidreader.services.lessons.models.NewLesson
 import com.rfidreader.services.lessons.models.StudentOnLesson
@@ -40,5 +41,10 @@ class LessonController(private val lessonService: LessonService) {
     @GetMapping("/getInfo/{id}")
     fun getStudentsOnLesson(@PathVariable("id") id: Long): ResponseEntity<List<StudentOnLesson>> {
         return ResponseEntity.ok(lessonService.getStudentsOnLesson(id))
+    }
+    @GetMapping("/getGroup/{disciplineId}/{groupId}")
+    fun getFullInfoByGroup(@PathVariable("disciplineId") disciplineId: Long,
+                           @PathVariable("groupId") groupId: Long): ResponseEntity<GroupAttendancesOnLesson> {
+        return ResponseEntity.ok(lessonService.getLessonsByGroupId(groupId, disciplineId))
     }
 }

@@ -1,2 +1,9 @@
 /mydatabase.db
 /.idea
+
+localhost_key.pem
+localhost_cert.pem
+localhost.csr
+CA_cert.srl
+CA_cert.pem
+CA_key.pem

@@ -7,7 +7,7 @@ import { disciplineService } from "@services/DisciplineService";
 import { groupService } from "@services/GroupService";
 import { lessonService } from "@services/LessonService";
 import { createRef, CSSProperties, useCallback, useEffect, useState } from "react";
-import { Button, Col, Container, Form, ListGroup, Row } from "react-bootstrap";
+import { Button, Col, Container, Dropdown, Form, ListGroup, Row } from "react-bootstrap";
 import { useNavigate, useParams } from "react-router-dom";
 import { v4 as uuidv4 } from 'uuid'
 
@@ -60,12 +60,19 @@ export default function LessonPage(): JSX.Element {
     const [ selectedGroups, setSelectedGroups ] = useState<IGroupInfo[] | null>(null)
     const [ editGroups, setEditGroups ] = useState<boolean>(false)
     const { disciplineId } = useParams()
+    const [ currentGroups, setCurrentGroups ] = useState<IGroupInfo[] | null>(null)
     
     const navigate = useNavigate()
     useEffect(() => {
         if(!disciplineId) throw 'Не указан ИД дисциплины';
         (async() => {
-            setLessons((await lessonService.getLessonsByDiscipline(parseInt(disciplineId))).data)
+            const response = await lessonService.getLessonsByDiscipline(parseInt(disciplineId))
+            setLessons(response.data)
+            const groups = [] as IGroupInfo[]
+            response.data.forEach(it => {
+                it.groups.forEach(g => { if (!groups.find(a => a.id == g.id)) groups.push(g) })
+            })
+            setCurrentGroups(groups)
             const disciplineResponse = (await disciplineService.getAllDisciplines())
                 .data.find(it => it.id == parseInt(disciplineId))
             if (disciplineResponse != undefined) {
@@ -182,7 +189,7 @@ export default function LessonPage(): JSX.Element {
                 />
             </Col>
         </Row>
-        <Row style={{margin: '10px 0px'}} className='gy-2 gy-lg-3 gx-3 mb-4 justify-content-center'>
+        <Row style={{margin: '10px 0px'}} className='g-3 gy-lg-3 gx-3 mb-4 justify-content-center'>
             <Col sm={6} md={6} lg={4}>
                 <Button style={{width: '100%'}} onClick={() => setEditGroups(true)}>
                     Управление группами
@@ -192,6 +199,22 @@ export default function LessonPage(): JSX.Element {
                 <Button style={{width: '100%'}} onClick={onApplyLessonHandler}>
                     { selected == null ? 'Добавить' : 'Обновить' }
                 </Button>
+            </Col>
+            <Col sm={6} md={6} lg={4}>
+                <Dropdown>
+                    <Dropdown.Toggle className='w-100'>Отчет по группе</Dropdown.Toggle>
+                    <Dropdown.Menu>
+                    {
+                        currentGroups?.map(({ id, faculty, name }, index) => {
+                            return (
+                            <Dropdown.Item key={`group-id#${index}`} href={`/groupTable/${disciplineId}/${id}`}>
+                                { `${faculty} ${name}` } 
+                            </Dropdown.Item>
+                            )
+                        })
+                    }
+                    </Dropdown.Menu>
+                </Dropdown>
             </Col>
         </Row>
         <Row>

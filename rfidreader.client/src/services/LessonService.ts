@@ -1,4 +1,4 @@
-import { ILessonInfo, INewLesson, IStudentOnLesson, IUpdateLesson } from "@core/models/lesson";
+import { IGroupAttendancesOnLesson, ILessonInfo, INewLesson, IStudentOnLesson, IUpdateLesson } from "@core/models/lesson";
 import $api from "@core/utils/api";
 import { AxiosResponse } from "axios";
 
@@ -18,5 +18,8 @@ class LessonService {
     public async updateLesson(group: IUpdateLesson): Promise<AxiosResponse> {
         return await $api.put(`/lesson/update`, group)
     }
+    public async getLessonsByGroup(disciplineId: number, groupId: number): Promise<AxiosResponse<IGroupAttendancesOnLesson>> {
+        return await $api.get(`/lesson/getGroup/${disciplineId}/${groupId}`)
+    } 
 }
 export const lessonService = new LessonService()

@@ -26,3 +26,13 @@ export interface IStudentOnLesson {
     student: IStudentInfo
     time: string | null
 }
+
+export interface IGroupAttendancesOnLesson {
+    group: IGroupInfo,
+    lessons: ILessonStudentInfo[]
+}
+
+export interface ILessonStudentInfo {
+    time: string,
+    students: IStudentOnLesson[]
+}

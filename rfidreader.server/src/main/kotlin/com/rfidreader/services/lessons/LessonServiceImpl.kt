@@ -5,9 +5,12 @@ import com.rfidreader.infrastructures.repositories.DisciplineRepository
 import com.rfidreader.infrastructures.repositories.GroupRepository
 import com.rfidreader.infrastructures.repositories.LessonRepository
 import com.rfidreader.infrastructures.repositories.customs.LessonCustomRepository
+import com.rfidreader.services.groups.models.GroupMapper
+import com.rfidreader.services.lessons.models.GroupAttendancesOnLesson
 import com.rfidreader.services.lessons.models.LessonDto
 
 import com.rfidreader.services.lessons.models.LessonMapper
+import com.rfidreader.services.lessons.models.LessonStudentInfo
 import com.rfidreader.services.lessons.models.NewLesson
 import com.rfidreader.services.lessons.models.StudentOnLesson
 import com.rfidreader.services.lessons.models.UpdateLesson
@@ -24,6 +27,7 @@ open class LessonServiceImpl(
     private val validator: Validator
 ) : LessonService {
     private val mapper = LessonMapper.INSTANCE
+    private val groupMapper = GroupMapper.INSTANCE
     @Autowired
     private lateinit var studentService: StudentService
     @Autowired
@@ -86,5 +90,20 @@ open class LessonServiceImpl(
             students.addAll(studentsInGroup)
         }
         return students
+    }
+    override fun getLessonsByGroupId(groupId: Long, disciplineId: Long): GroupAttendancesOnLesson {
+        val group = groupRepository.findById(groupId).orElseThrow { ProcessException("Group id=$groupId not found") }
+        val discipline = disciplineRepository.findById(disciplineId).orElseThrow { ProcessException("Discipline not found") }
+
+        val students = mutableListOf<LessonStudentInfo>()
+        discipline.lessons.forEach {
+            val attendances = getStudentsOnLesson(it.id!!).filter { it.student.group.id == groupId }.toList()
+            if (attendances.isEmpty()) return@forEach
+            students.add(LessonStudentInfo(
+                time = it.time,
+                students = attendances
+            ))
+        }
+        return GroupAttendancesOnLesson(groupMapper.toGroupDto(group), students)
     }
 }

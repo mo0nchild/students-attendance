@@ -9,6 +9,9 @@ class StudentService {
     public async addStudent(student: INewStudent): Promise<AxiosResponse> {
         return await $api.post(`/students/add`, student)
     }
+    public async addAllStudents(students: INewStudent[]): Promise<AxiosResponse> {
+        return await $api.post(`/students/addAll`, students)
+    }
     public async removeStudent(id: number): Promise<AxiosResponse> {
         return await $api.delete(`/students/remove/${id}`)
     }

@@ -10,10 +10,14 @@ import org.springframework.web.bind.annotation.*
 @RestController
 @RequestMapping("/api/students")
 class StudentController(private val studentService: StudentServiceImpl) {
-
     @GetMapping("/getAll")
     fun getAllStudents(): ResponseEntity<List<StudentDto>> {
         return ResponseEntity.ok(studentService.getAllStudents())
+    }
+    @PostMapping("/addAll")
+    fun addStudent(@RequestBody student: List<NewStudent>): ResponseEntity<String> {
+        studentService.addAllStudents(student)
+        return ResponseEntity.ok("Students successfully added")
     }
     @PostMapping("/add")
     fun addStudent(@RequestBody student: NewStudent): ResponseEntity<String> {

@@ -20,6 +20,7 @@ class StudentServiceImpl(
     private val studentMapper = StudentMapper.INSTANCE
     @Autowired
     private lateinit var groupRepository: GroupRepository
+
     @Transactional
     override fun addStudent(newStudent: NewStudent): Unit {
         validator.validate(newStudent).let {
@@ -31,6 +32,9 @@ class StudentServiceImpl(
         val entity = studentMapper.toStudentEntity(newStudent)
         studentRepository.saveWithGroup(entity, newStudent.groupId)
     }
+    @Transactional
+    override fun addAllStudents(newStudents: List<NewStudent>): Unit = newStudents.forEach { addStudent(it) }
+
     @Transactional
     override fun deleteStudentById(id: Long) {
         val entity = studentRepository.findById(id).orElseThrow { ProcessException("Student not found") }

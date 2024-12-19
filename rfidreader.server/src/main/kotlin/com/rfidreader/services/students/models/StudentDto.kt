@@ -13,7 +13,6 @@ data class StudentDto(
     val rfidCode: String,
     val group: GroupDto
 )
-
 data class UpdateStudent(
     @field:NotNull
     val id: Long,
