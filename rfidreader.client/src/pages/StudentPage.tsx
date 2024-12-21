@@ -170,7 +170,7 @@ export default function StudentPage(): JSX.Element {
     <div>
     <Container fluid='sm'>
         <div style={pageHeaderStyle}>
-            <a style={headerLinkStyle} onClick={() => navigate(-1)}>&#8592;&nbsp;
+            <a style={headerLinkStyle} onClick={() => navigate('/groups')}>&#8592;&nbsp;
                 <span style={{textDecoration: 'underline', textUnderlineOffset: '5px'}}>Назад</span>
             </a>
             <h2 style={{display: 'inline-block'}}>Управление студентами [{groupName}]</h2>
@@ -261,12 +261,6 @@ export default function StudentPage(): JSX.Element {
             </Processing>
         </Row>
     </Container>
-    <ModalWindow isOpen={scanning} onClose={() => setScanning(false)}>
-        <div style={scannerModalStyle}>
-            <Spinner animation="grow" />
-            <p>Сканирование пропуска...</p>
-        </div>
-    </ModalWindow>
     <ModalWindow isOpen={scanning} onClose={() => setScanning(false)}>
         <div style={scannerModalStyle}>
             <Spinner animation="grow" />

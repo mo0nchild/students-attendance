@@ -11,7 +11,7 @@ export async function getDataFromJsonFile<T>(): Promise<T> {
     const file = await fileHandle.getFile()
     return JSON.parse(await file.text()) as T
 }
-type StudentFileData = { surname: string, name: string, patronymic: string }
+export type StudentFileData = { surname: string, name: string, patronymic: string }
 export async function getStudentsFromFile(): Promise<StudentFileData[]> {
     const [ fileHandle ] = await window.showOpenFilePicker({
         types: [

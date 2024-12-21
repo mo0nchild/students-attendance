@@ -5,6 +5,7 @@ import { groupService } from "@services/GroupService"
 import { studentService } from "@services/StudentService"
 import { createElement, createRef, CSSProperties, useCallback, useEffect, useState } from "react"
 import { Accordion, Button, Col, Container, Dropdown, Form, ListGroup, Row } from "react-bootstrap"
+import { useNavigate } from "react-router-dom"
 import { v4 as uuidv4 } from 'uuid'
 
 const groupNameRef = createRef<HTMLInputElement>()
@@ -19,6 +20,7 @@ export default function GroupPage(): JSX.Element {
     const [status, setStatus] = useState<LoadingStatus>('loading')
     const [updateUuid, setUpdateUuid] = useState<string>(uuidv4())
     const [studentsInGroup, setStudentsInGroup] = useState<StudentsInGroup[]>([])
+    const navigator = useNavigate()
     useEffect(() => {
         (async() => {
             const response = await groupService.getAllGroups()
@@ -79,6 +81,9 @@ export default function GroupPage(): JSX.Element {
             console.log(error)
         }
     }, [])
+    const onImportingHander = useCallback((id: number) => {
+        navigator(`/importing/${id}`)
+    }, [navigator])
     useEffect(() => {
         groupNameRef.current!.value = (selected == null ? '' : selected.name)
         facultyRef.current!.value = (selected == null ? '' : selected.faculty)
@@ -119,6 +124,19 @@ export default function GroupPage(): JSX.Element {
                                 <Dropdown.Item onClick={() => onRemoveGroupHandler(g)}>
                                     Удалить группу
                                 </Dropdown.Item>
+                                {
+                                (() => {
+                                    const students = studentsInGroup.find(it => it.id == g.id)
+                                    if (students && students.count <= 0) {
+                                        return (
+                                            <Dropdown.Item onClick={() => onImportingHander(g.id)}>
+                                                Импортировать
+                                            </Dropdown.Item>
+                                        )
+                                    }
+                                    else return <></>
+                                })()
+                                }
                             </Dropdown.Menu>
                         </Dropdown>
                         
