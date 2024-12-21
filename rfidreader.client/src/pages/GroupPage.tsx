@@ -2,6 +2,7 @@ import Processing, { LoadingStatus } from "@components/processing/Processing"
 import { IGroupInfo } from "@core/models/group"
 import { groupBy } from "@core/utils/processing"
 import { groupService } from "@services/GroupService"
+import { studentService } from "@services/StudentService"
 import { createElement, createRef, CSSProperties, useCallback, useEffect, useState } from "react"
 import { Accordion, Button, Col, Container, Dropdown, Form, ListGroup, Row } from "react-bootstrap"
 import { v4 as uuidv4 } from 'uuid'
@@ -10,17 +11,26 @@ const groupNameRef = createRef<HTMLInputElement>()
 const facultyRef = createRef<HTMLInputElement>()
 const updateCheckRef = createRef<HTMLInputElement>()
 
+type StudentsInGroup = { count: number, id: number }
+
 export default function GroupPage(): JSX.Element {
     const [groups, setGroups] = useState<IGroupInfo[] | null>(null)
     const [selected, setSelected] = useState<IGroupInfo | null>(null)
     const [status, setStatus] = useState<LoadingStatus>('loading')
     const [updateUuid, setUpdateUuid] = useState<string>(uuidv4())
+    const [studentsInGroup, setStudentsInGroup] = useState<StudentsInGroup[]>([])
     useEffect(() => {
-        groupService.getAllGroups()
-            .then(({data}) => {
-                setGroups(data)
-                setStatus('success')
-            })
+        (async() => {
+            const response = await groupService.getAllGroups()
+            setGroups(response.data)
+            const inGroup = [] as StudentsInGroup[]
+            for (const { id } of response.data) {
+                const studentCount = (await studentService.getStudentsByGroup(id)).data.length
+                inGroup.push({ id, count: studentCount })
+            } 
+            setStudentsInGroup(inGroup)
+
+        })().then(() => setStatus('success'))
             .catch(error => {
                 console.log(error)
                 setStatus('failed')
@@ -96,7 +106,7 @@ export default function GroupPage(): JSX.Element {
                 {
                 result[item].map((g, i) => {
                     return (
-                    <ListGroup.Item key={`item#${index}-${i}`}>
+                    <ListGroup.Item key={`item#${index}-${i}`} className='d-flex justify-content-between'>
                         <Dropdown>
                             <Dropdown.Toggle style={dropDownStyle}>{g.name}</Dropdown.Toggle>
                             <Dropdown.Menu>
@@ -111,6 +121,13 @@ export default function GroupPage(): JSX.Element {
                                 </Dropdown.Item>
                             </Dropdown.Menu>
                         </Dropdown>
+                        
+                        <div className='d-flex align-items-center'>
+                            <span>
+                                {`Кол-во студентов: ${studentsInGroup.find(it => it.id == g.id)?.count ?? 0}`}
+                            </span>
+                        </div>
+
                     </ListGroup.Item>
                     )
                 })
@@ -173,7 +190,7 @@ const pageHeaderStyle: CSSProperties = {
     marginBottom: '14px',  
 }
 const dropDownStyle: CSSProperties = {
-    width: '100%',
+    width: '70%',
     textAlign: 'start',
     background: 'transparent',
     border: 'none'

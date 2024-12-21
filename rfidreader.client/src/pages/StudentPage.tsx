@@ -3,8 +3,7 @@ import Processing, { LoadingStatus } from "@components/processing/Processing"
 import CustomTable, { DataType, HeaderType } from "@components/table/CustomTable"
 import { useScanner } from "@core/hooks/scanner"
 import { IGroupInfo } from "@core/models/group"
-import { INewStudent, IStudentInfo } from "@core/models/student"
-import { getDataFromJsonFile, getJsonFile } from "@core/utils/fileSystem"
+import { IStudentInfo } from "@core/models/student"
 import { groupService } from "@services/GroupService"
 import { studentService } from "@services/StudentService"
 import { AxiosError } from "axios"
@@ -148,25 +147,6 @@ export default function StudentPage(): JSX.Element {
             }
         }
     }, [selected])
-    const onOpenFileHandler = useCallback(async () => {
-        const data = await getDataFromJsonFile<INewStudent[]>()
-        console.log(data)
-        try {
-            const response = await studentService.addAllStudents(data)
-            if (response.status == 200) {
-                alert('Запрос успешно выполнен')
-                setUpdateUuid(uuidv4())
-                clearInputForm()
-            }
-        }
-        catch(error) {
-            if(error instanceof AxiosError && typeof error.response?.data == 'string') {
-                alert(`Ошибка выполнения запроса: ${error.response?.data}`)
-            }
-            else alert('Ошибка выполнения запроса')
-            console.log(error)
-        }
-    }, [])
     useEffect(() => {
         surnameRef.current!.value = selected == null ? '' : selected.surname
         nameRef.current!.value = selected == null ? '' : selected.name
@@ -250,11 +230,6 @@ export default function StudentPage(): JSX.Element {
                     }
                 }}
             />
-            </Col>
-        </Row>
-        <Row className='gy-2 gx-3 justify-content-end' style={{margin: '0px 0px 10px'}}>
-            <Col xs={12} sm={6} md={4}>
-                <Button style={{width: '100%'}} onClick={onOpenFileHandler}>Импорт из файла</Button>
             </Col>
         </Row>
         <Row className='gy-2 gx-3' style={{margin: '0px 0px 20px'}}>
