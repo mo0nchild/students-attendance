@@ -6,6 +6,7 @@ import { INewStudent } from "@core/models/student";
 import { getStudentsFromFile, StudentFileData } from "@core/utils/fileSystem";
 import { groupService } from "@services/GroupService";
 import { studentService } from "@services/StudentService";
+import { AxiosError } from "axios";
 import { CSSProperties, useCallback, useEffect, useState } from "react";
 import { Button, Col, Container, Row, Spinner } from "react-bootstrap";
 import { useNavigate, useParams } from "react-router-dom";
@@ -85,7 +86,18 @@ export default function ImportingPage(): JSX.Element {
                 patronymic,
              }) as INewStudent)
         if (newStudents.length > 0) {
-            await studentService.addAllStudents(newStudents)
+            try {
+                await studentService.addAllStudents(newStudents)
+            }
+            catch(error) {
+                if (error instanceof AxiosError && error.response) {
+                    const checkError = /^RfidCode (?<rfid>\w+) duplicate$/g.exec(error.response.data)
+                    if (checkError && checkError.groups) {
+                        alert(`Дублирование код пропуска: ${checkError.groups.rfid}`)
+                    }
+                }
+                return
+            }
             navigate(`/students/${groupId}/${group?.name}`)
         }
         else alert(`Ни у одного студента не указан код пропуска`)

@@ -33,8 +33,12 @@ class StudentServiceImpl(
         studentRepository.saveWithGroup(entity, newStudent.groupId)
     }
     @Transactional
-    override fun addAllStudents(newStudents: List<NewStudent>): Unit = newStudents.forEach { addStudent(it) }
-
+    override fun addAllStudents(newStudents: List<NewStudent>): Unit {
+        for(item in newStudents) {
+           if (!newStudents.all { it.rfidCode != item.rfidCode }) throw ProcessException("RfidCode ${item.rfidCode} duplicate")
+        }
+        newStudents.forEach { addStudent(it) }
+    }
     @Transactional
     override fun deleteStudentById(id: Long) {
         val entity = studentRepository.findById(id).orElseThrow { ProcessException("Student not found") }
