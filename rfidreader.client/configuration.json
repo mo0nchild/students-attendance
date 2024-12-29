@@ -1,4 +1,4 @@
 {
-    "backendIP": "https://192.168.107.86",
+    "backendIP": "192.168.107.86",
     "backendPort": "8443"
 }
