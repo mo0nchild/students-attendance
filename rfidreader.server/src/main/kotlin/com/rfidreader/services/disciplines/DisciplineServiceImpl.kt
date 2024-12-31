@@ -2,7 +2,6 @@ package com.rfidreader.services.disciplines
 
 import com.rfidreader.infrastructures.exceptions.ProcessException
 import com.rfidreader.infrastructures.repositories.DisciplineRepository
-import com.rfidreader.infrastructures.repositories.LecturerRepository
 import com.rfidreader.services.disciplines.models.DisciplineDto
 import com.rfidreader.services.disciplines.models.DisciplineMapper
 import com.rfidreader.services.disciplines.models.NewDiscipline
@@ -18,8 +17,6 @@ class DisciplineServiceImpl(
     private val validator: Validator
 ) : DisciplineService {
     private val mapper = DisciplineMapper.INSTANCE
-    @Autowired
-    private lateinit var lecturerRepository: LecturerRepository
 
     @Transactional
     override fun addDiscipline(newDiscipline: NewDiscipline) {
@@ -30,7 +27,7 @@ class DisciplineServiceImpl(
             if(it.isNotEmpty()) throw ProcessException("Discipline already exists")
         }
         val entity = mapper.toDisciplineEntity(newDiscipline)
-        repository.saveWithLecture(entity, newDiscipline.lecturerId)
+        repository.saveWithLecture(entity)
     }
     @Transactional
     override fun removeDiscipline(id: Long) {
@@ -45,16 +42,11 @@ class DisciplineServiceImpl(
         val entity = repository.findById(discipline.id).orElseThrow { ProcessException("Discipline not found") }
             .also {
                 it.name = discipline.name
-                it.lecturer = lecturerRepository.findById(discipline.lecturerId)
-                    .orElseThrow { ProcessException("Lecturer not found") }
             }
         repository.save(entity)
     }
 
     override fun getAllDisciplines(): List<DisciplineDto> {
         return repository.findAll().map { mapper.toDisciplineDto(it) }
-    }
-    override fun getDisciplineByLecturer(id: Long): List<DisciplineDto> {
-        return repository.getDisciplinesByLecturer(id).map { mapper.toDisciplineDto(it) }
     }
 }

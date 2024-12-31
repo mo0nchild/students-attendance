@@ -15,10 +15,6 @@ class DisciplineController(private val disciplineService: DisciplineService) {
     fun getAllDisciplines(): ResponseEntity<List<DisciplineDto>> {
         return ResponseEntity.ok(disciplineService.getAllDisciplines())
     }
-    @GetMapping("/getAll/lecturer/{id}")
-    fun getAllDisciplinesByLecturerId(@PathVariable id: Long): ResponseEntity<List<DisciplineDto>> {
-        return ResponseEntity.ok(disciplineService.getDisciplineByLecturer(id))
-    }
     @PutMapping("/update")
     fun updateDiscipline(@RequestBody discipline: UpdateDiscipline): ResponseEntity<String> {
         disciplineService.updateDiscipline(discipline)

@@ -1,8 +1,8 @@
 @apiKey=73e259e9-afb3-490b-ace1-b19c31bec8a5
-@host=localhost:8443
+@host=127.0.0.1:8443
 
 ###
-POST https://{{host}}/api/group/add
+POST http://{{host}}/api/group/add
 Content-Type: application/json
 API-KEY: {{apiKey}}
 
@@ -17,7 +17,7 @@ API-KEY: {{apiKey}}
 <> 2024-11-27T183824.401.txt
 
 ###
-GET https://{{host}}/api/group/getAll
+GET http://{{host}}/api/group/getAll
 API-KEY: {{apiKey}}
 
 <> 2024-11-30T043500.200.json
@@ -25,13 +25,13 @@ API-KEY: {{apiKey}}
 <> 2024-11-27T184549.200.json
 
 ###
-DELETE https://{{host}}/api/group/remove/7
+DELETE http://{{host}}/api/group/remove/7
 API-KEY: {{apiKey}}
 
 <> 2024-11-27T190705.400.txt
 
 ###
-PUT https://{{host}}/api/group/update
+PUT http://{{host}}/api/group/update
 Content-Type: application/json
 API-KEY: {{apiKey}}
 
@@ -42,7 +42,7 @@ API-KEY: {{apiKey}}
 }
 
 ###
-GET https://{{host}}/api/students/getAll
+GET http://{{host}}/api/students/getAll
 API-KEY: {{apiKey}}
 
 <> 2024-11-30T043807.200.json
@@ -53,11 +53,11 @@ API-KEY: {{apiKey}}
 <> 2024-11-27T191037.200.json
 <> 2024-11-27T190708.200.json
 ###
-GET https://{{host}}/api/students/getAll/group/1
+GET http://{{host}}/api/students/getAll/group/1
 API-KEY: {{apiKey}}
 
 ###
-PUT https://{{host}}/api/students/update
+PUT http://{{host}}/api/students/update
 Content-Type: application/json
 API-KEY: {{apiKey}}
 
@@ -73,7 +73,7 @@ API-KEY: {{apiKey}}
 <> 2024-11-30T043804.200.txt
 
 ###
-POST https://{{host}}/api/students/add
+POST http://{{host}}/api/students/add
 Content-Type: application/json
 API-KEY: {{apiKey}}
 
@@ -90,7 +90,7 @@ API-KEY: {{apiKey}}
 <> 2024-11-28T230724.200.txt
 
 ###
-DELETE https://{{host}}/api/students/remove/2
+DELETE http://{{host}}/api/students/remove/2
 API-KEY: {{apiKey}}
 
 <> 2024-11-27T191046.200.txt
@@ -99,36 +99,7 @@ API-KEY: {{apiKey}}
 <> 2024-11-27T190634.200.txt
 
 ###
-GET https://{{host}}/api/lecturer/getAll
-API-KEY: {{apiKey}}
-
-<> 2024-11-27T192841.200.json
-<> 2024-11-27T192557.200.json
-
-###
-POST https://{{host}}/api/lecturer/add
-Content-Type: application/json
-API-KEY: {{apiKey}}
-
-{
-  "name": "Виктор",
-  "surname": "Ватуршин",
-  "patronymic": "Павлович"
-}
-
-<> 2024-11-28T214512.200.txt
-<> 2024-11-27T192638.200.txt
-
-###
-DELETE https://{{host}}/api/lecturer/remove/2
-API-KEY: {{apiKey}}
-
-<> 2024-11-27T192836.400.txt
-<> 2024-11-27T192832.200.txt
-<> 2024-11-27T192723.405.json
-
-###
-GET https://{{host}}/api/discipline/getAll
+GET http://{{host}}/api/discipline/getAll
 API-KEY: {{apiKey}}
 
 <> 2024-11-29T061210.200.json
@@ -136,12 +107,11 @@ API-KEY: {{apiKey}}
 <> 2024-11-27T200051.200.json
 ###
 
-POST https://{{host}}/api/discipline/add
+POST http://{{host}}/api/discipline/add
 Content-Type: application/json
 API-KEY: {{apiKey}}
 
 {
-  "lecturerId": 1,
   "name": "Математика"
 }
 
@@ -149,26 +119,21 @@ API-KEY: {{apiKey}}
 <> 2024-11-27T200233.200.txt
 
 ###
-PUT https://{{host}}/api/discipline/update
+PUT http://{{host}}/api/discipline/update
 Content-Type: application/json
 API-KEY: {{apiKey}}
 
 {
   "id": 1,
-  "name": "Математика",
-  "lecturerId": 2
+  "name": "Математика"
 }
 
 ###
-DELETE https://{{host}}/api/discipline/remove/2
+DELETE http://{{host}}/api/discipline/remove/2
 API-KEY: {{apiKey}}
 
 ###
-GET https://{{host}}/api/discipline/getAll/lecturer/2
-API-KEY: {{apiKey}}
-
-###
-POST https://{{host}}/api/lesson/add
+POST http://{{host}}/api/lesson/add
 Content-Type: application/json
 API-KEY: {{apiKey}}
 
@@ -186,7 +151,7 @@ API-KEY: {{apiKey}}
 <> 2024-11-28T213934.200.txt
 
 ###
-GET https://{{host}}/api/lesson/getAll/discipline/1
+GET http://{{host}}/api/lesson/getAll/discipline/1
 API-KEY: {{apiKey}}
 
 <> 2024-11-29T071402.200.json
@@ -199,11 +164,11 @@ API-KEY: {{apiKey}}
 <> 2024-11-28T213937.200.json
 
 ###
-DELETE https://{{host}}/api/lesson/remove/4
+DELETE http://{{host}}/api/lesson/remove/4
 API-KEY: {{apiKey}}
 
 ###
-PUT https://{{host}}/api/lesson/update
+PUT http://{{host}}/api/lesson/update
 Content-Type: application/json
 API-KEY: {{apiKey}}
 
@@ -216,7 +181,7 @@ API-KEY: {{apiKey}}
 }
 
 ###
-POST https://{{host}}/api/attendance/add
+POST http://{{host}}/api/attendance/add
 Content-Type: application/json
 API-KEY: {{apiKey}}
 
@@ -238,7 +203,7 @@ API-KEY: {{apiKey}}
 <> 2024-11-28T230252.400.txt
 
 ###
-GET https://{{host}}/api/attendance/getAll/lesson/5
+GET http://{{host}}/api/attendance/getAll/lesson/5
 API-KEY: {{apiKey}}
 
 <> 2024-11-29T071351.200.json
@@ -249,14 +214,14 @@ API-KEY: {{apiKey}}
 <> 2024-11-28T230802.200.json
 
 ###
-DELETE https://{{host}}/api/attendance/remove/34237423/4
+DELETE http://{{host}}/api/attendance/remove/34237423/4
 API-KEY: {{apiKey}}
 
 <> 2024-11-28T231953.200.txt
 <> 2024-11-28T231948.401.txt
 
 ###
-GET https://{{host}}/api/lesson/getInfo/5
+GET http://{{host}}/api/lesson/getInfo/5
 API-KEY: {{apiKey}}
 
 <> 2024-11-29T071409.200.json
@@ -266,5 +231,5 @@ API-KEY: {{apiKey}}
 <> 2024-11-29T070450.200.json
 <> 2024-11-29T061455.200.json
 ###
-GET https://{{host}}/api/lesson/getGroup/1/2
+GET http://{{host}}/api/lesson/getGroup/1/2
 API-KEY: {{apiKey}}

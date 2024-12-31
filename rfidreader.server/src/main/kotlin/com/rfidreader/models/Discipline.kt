@@ -11,10 +11,6 @@ data class Discipline (
     val id: Long? = null,
     var name: String,
 ) {
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "lecturer_id")
-    var lecturer: Lecturer? = null
-
     @OneToMany(mappedBy = "discipline", cascade = [CascadeType.ALL], orphanRemoval = true)
     var lessons: MutableList<Lesson> = mutableListOf()
 }

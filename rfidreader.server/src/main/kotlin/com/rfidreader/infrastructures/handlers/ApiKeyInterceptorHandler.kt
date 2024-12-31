@@ -14,7 +14,7 @@ class ApiKeyInterceptorHandler(private val environment: Environment): HandlerInt
         private const val API_KEY_HEADER = "API-KEY"
     }
     override fun preHandle(request: HttpServletRequest, response: HttpServletResponse, handler: Any): Boolean {
-        if (request.method == HttpMethod.OPTIONS.name()){
+        if (request.method == HttpMethod.OPTIONS.name()) {
             response.status = HttpServletResponse.SC_OK
             return true
         }

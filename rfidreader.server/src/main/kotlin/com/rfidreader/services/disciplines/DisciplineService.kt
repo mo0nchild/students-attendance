@@ -11,5 +11,4 @@ interface DisciplineService {
     fun updateDiscipline(discipline: UpdateDiscipline): Unit
 
     fun getAllDisciplines(): List<DisciplineDto>
-    fun getDisciplineByLecturer(id: Long): List<DisciplineDto>
 }

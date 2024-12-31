@@ -1,0 +1,29 @@
+.headerMain {
+    background: #222222;
+    height: 60px;
+    --bs-navbar-brand-color: white !important;
+    & div.container-fluid {
+        padding: 0px 20px !important;
+    }
+}
+.navigationRef {
+    --bs-navbar-active-color: grey !important;
+    --bs-nav-link-color: white;
+    --bs-nav-link-hover-color: grey;
+}
+.navigationDropdown {
+    --bs-nav-link-color: white;
+    --bs-navbar-active-color: grey;
+    --bs-nav-link-hover-color: grey;
+}
+.headerRoot {
+    border-bottom: 1px solid white;
+    position: fixed;
+    width: 100%;
+    
+}
+.navigation {
+    &{
+        justify-content: start;
+    }
+}

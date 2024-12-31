@@ -16,16 +16,10 @@ data class UpdateDiscipline(
     @field:NotNull
     @field:NotEmpty
     val name: String,
-
-    @field:NotNull
-    val lecturerId: Long
 )
 data class NewDiscipline(
     @field:Size(min = 3, max = 100)
     @field:NotNull
     @field:NotEmpty
     val name: String,
-
-    @field:NotNull
-    val lecturerId: Long
 )

@@ -14,7 +14,6 @@ interface DisciplineMapper {
     )
     fun toDisciplineDto(discipline: Discipline): DisciplineDto
     @Mappings(
-        Mapping(target = "lecturer", ignore = true),
         Mapping(target = "lessons", ignore = true)
     )
     fun toDisciplineEntity(newDiscipline: NewDiscipline): Discipline
