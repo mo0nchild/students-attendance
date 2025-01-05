@@ -128,3 +128,33 @@ body {
     border-color: grey;
   }
 }
+
+.card  {
+  border: none;
+  border-radius: 0px;
+  & .accordion-collapse.collapse.show, & .accordion-collapse.collapsing {
+    border-top: 1px solid white;
+  }
+  & .card-header {
+    border-radius: 0px;
+  }
+  border: 1px solid white;
+  margin-top: -1px;
+}
+.accordion {
+  & .card:first-child {
+    border-radius: 6px 6px 0px 0px;
+    & > .card-header {
+      border-radius: 6px 6px 0px 0px;
+    }
+  }
+  & .card:last-child {
+    border-radius: 0px 0px 6px 6px;
+    & > .card-header {
+      border-radius: 0px 0px 6px 6px;
+    }
+  }
+}
+.MuiTreeItem-content.Mui-selected {
+  background-color: rgb(201 203 204 / 8%) !important;
+}

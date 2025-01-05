@@ -1,4 +1,4 @@
-type GroupByResult<T> = { [key: string]: T[] }
+export type GroupByResult<T> = { [key: string]: T[] }
 
 export function groupBy<T>(array: T[], keyGetter: (item: T) => string): GroupByResult<T> {
     return array.reduce((acc, item) => {
@@ -10,7 +10,7 @@ export function groupBy<T>(array: T[], keyGetter: (item: T) => string): GroupByR
     }, {} as GroupByResult<T>);
 }
 
-export function convertToDDMM(dateTime: string) {
+export function convertToDDMM(dateTime: string): string {
     const date = new Date(dateTime);
 
 	const day = String(date.getDate()).padStart(2, '0')

@@ -1,4 +1,4 @@
-import { createBrowserRouter } from 'react-router-dom';
+import { createHashRouter } from 'react-router-dom';
 import { createElement } from 'react';
 
 import StudentPage from '@pages/StudentPage';
@@ -6,7 +6,6 @@ import DisciplinePage from '@pages/DisciplinePage';
 import LessonPage from '@pages/LessonPage';
 import GroupPage from '@pages/GroupPage';
 import AttendancePage from '@pages/AttendancePage';
-import GroupTablePage from '@pages/GroupTablePage';
 import ImportingPage from '@pages/ImportingPage';
 
 export function getPreviousPagePath(): string {
@@ -17,7 +16,7 @@ export function getPreviousPagePath(): string {
     }
     return result
 }
-export const routers = createBrowserRouter([
+export const routers = createHashRouter([
     {
         path: '/groups',
         element: createElement(GroupPage)
@@ -35,12 +34,8 @@ export const routers = createBrowserRouter([
         element: createElement(LessonPage)
     },
     {
-        path: '/attendance/:lessonId/:disciplineId',
+        path: '/attendance/:disciplineId/:groupId',
         element: createElement(AttendancePage)
-    },
-    {
-        path: '/groupTable/:disciplineId/:groupId',
-        element: createElement(GroupTablePage)
     },
     {
         path: '/importing/:groupId',

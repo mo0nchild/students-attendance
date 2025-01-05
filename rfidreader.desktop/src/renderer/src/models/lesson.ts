@@ -33,6 +33,7 @@ export interface IGroupAttendancesOnLesson {
 }
 
 export interface ILessonStudentInfo {
+    lessonId: number,
     time: string,
     students: IStudentOnLesson[]
 }

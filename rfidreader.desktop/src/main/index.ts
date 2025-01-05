@@ -3,19 +3,32 @@
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 import { app, shell, BrowserWindow, Tray, Menu } from 'electron'
 import { join } from 'path'
+import { readFileSync } from 'fs'
 import { electronApp, optimizer } from '@electron-toolkit/utils'
 import { ChildProcess, execSync, spawn } from 'child_process'
 
 import icon from '../../resources/icon512.png?asset'
 
-const javaPath = String.raw`C:\Users\letsp\.jdks\openjdk-23\bin\java.exe`
-const serverPort = 8443
-const serverHealthCheckUrl = 'http://127.0.0.1:8443/healthcheck' 
 let serverIsStarted: boolean = false
 let serverProcess: ChildProcess | null = null
 
 let mainWindow: BrowserWindow | null = null
 let tray: Tray | null = null
+
+const javaPath = (() => {
+  if (!process.env.JAVA_HOME) throw new Error('JAVA_HOME environment variable not install')
+  return join(process.env.JAVA_HOME, 'bin', 'java.exe')
+})()
+const serverPort = (() => {
+  const propertiesPath = app.isPackaged
+    ? join(process.cwd(), './resources/app.asar.unpacked/resources/application.properties')
+    : join(__dirname, './../../resources/application.properties')
+  const portRegex = readFileSync(propertiesPath, { encoding: 'utf8' }).match(/port=(?<port>\d+)/) 
+  if (portRegex && portRegex.groups) {
+    return parseInt(portRegex.groups.port)
+  }
+  else throw new Error('Not found application.properties PORT property')
+})()
 
 function createAppWindow(): BrowserWindow {
   mainWindow = new BrowserWindow({
@@ -35,16 +48,13 @@ function createAppWindow(): BrowserWindow {
   if (!app.isPackaged && process.env['ELECTRON_RENDERER_URL']) {
     mainWindow.loadURL(`${process.env['ELECTRON_RENDERER_URL']}`)
   } else {
-    mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
+    mainWindow.loadFile(join(__dirname, '../renderer/index.html'), { hash: '/' })
   }
   mainWindow.on('close', (event) => {
     if (mainWindow) {
       event.preventDefault()
       mainWindow.hide()
     }
-  })
-  mainWindow.on('closed', () => {
-    mainWindow = null
   })
   return mainWindow
 }
@@ -63,6 +73,7 @@ function createPrepareWindow(): BrowserWindow {
       preload: join(__dirname, '../preload/index.js'),
     }
   })
+  prepareWindow.setAlwaysOnTop(true, 'screen-saver')
   if (!app.isPackaged && process.env['ELECTRON_RENDERER_URL']) {
     prepareWindow.loadURL(`${process.env['ELECTRON_RENDERER_URL']}/prepare.html`)
   } else {
@@ -72,61 +83,77 @@ function createPrepareWindow(): BrowserWindow {
   return prepareWindow
 }
 
-function createTray() {
+function createTray(contextMenu = Menu.buildFromTemplate([ { label: 'Quit', click: () => app.quit() } ])) {
   tray = new Tray(icon)
-  const contextMenu = Menu.buildFromTemplate([
-    { label: 'Quit', click: () => app.quit() }
-  ])
-  tray.addListener('click', () => {
-    if (serverIsStarted) mainWindow?.show()
-  })
+  tray.addListener('click', () => { if (serverIsStarted) mainWindow?.show() })
+    
   tray.setToolTip('Посещения')
   tray.setContextMenu(contextMenu)
 }
 
-app.whenReady().then(() => {
-  // Set app user model id for windows
+if (!app.requestSingleInstanceLock()) app.quit()
+else app.whenReady().then(() => {
   electronApp.setAppUserModelId('com.electron')
-
+  
   app.on('browser-window-created', (_, window) => {
     optimizer.watchWindowShortcuts(window)
   })
   createAppWindow()
   createTray()
   let prepareWindow = createPrepareWindow() as BrowserWindow | null
+
   prepareWindow!.on('show', function() {
-    serverProcess = spawn(javaPath, ['-jar', `-Dspring.config.location=${join(__dirname, './../../resources/application.properties')}`, 
-      join(__dirname, './../../resources/rfidreader-backend.jar'), ])
-
-    serverProcess.stdout?.on('data', data => console.log(`INFO: ${data}`))
-    serverProcess.on('error', error => console.log(error))
-    serverProcess.on('exit', code => {
-      console.log(`EXIT: with code ${code}`)
-      app.quit()
-    })
-
+    createServerProcess()
+    const serverHealthCheckUrl = `http://127.0.0.1:${serverPort}/healthcheck`
     const checkServer = setInterval(async () => {
       try {
-        const response = await fetch(serverHealthCheckUrl)
-        if(response.status == 200) {
+        const response = await fetch(serverHealthCheckUrl, { method: 'GET' })
+        if (response.status == 200) {
           serverIsStarted = true
-          clearInterval(checkServer)
           mainWindow?.show()
           mainWindow?.reload()
+          
           prepareWindow?.hide()
           prepareWindow = null
+
+          clearInterval(checkServer)
         }
-      }
-      catch {}
+      } catch {}
     }, 1000)
   })
   prepareWindow!.on('ready-to-show', () => prepareWindow!.show())
+})
+app.on('second-instance', () => {
+  if (mainWindow && serverIsStarted) {
+    mainWindow?.show()
+    mainWindow?.reload()
+  }
 })
 app.on('before-quit', () => {
   stopServerProcess()
   process.exit()
 })
 app.on('window-all-closed', () => {})
+
+function createServerProcess(): ChildProcess {
+  serverProcess = spawn(javaPath, ['-jar', 
+    app.isPackaged
+      ? `-Dspring.config.location=${join(process.cwd(), './resources/app.asar.unpacked/resources/application.properties')}`
+      : `-Dspring.config.location=${join(__dirname, './../../resources/application.properties')}`, 
+    !app.isPackaged
+      ? join(__dirname, './../../resources/rfidreader-backend.jar')
+      : join(process.cwd(), './resources/app.asar.unpacked/resources/rfidreader-backend.jar')
+  ])
+  serverProcess.stdout?.on('data', data => console.log(`INFO: ${data}`))
+  serverProcess?.stderr?.on('data', data => console.log(`ERROR: ${data}`))
+  
+  serverProcess.on('error', error => console.log(error))
+  serverProcess.on('exit', code => {
+    console.log(`EXIT: with code ${code}`)
+    app.quit()
+  })
+  return serverProcess
+}
 
 function stopServerProcess() {
   if (serverProcess) {

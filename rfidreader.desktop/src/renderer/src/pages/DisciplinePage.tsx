@@ -1,7 +1,10 @@
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
-import CustomListGroup from "@components/listgroup/CustomListGroup";
 import Processing, { LoadingStatus } from "@components/processing/Processing";
 import { IDisciplineInfo } from "@core/models/discipline";
+import { AccordionList } from "@renderer/components/accordionList/AccordionList";
+import { IGroupInfo } from "@renderer/models/group";
+import { lessonService } from "@renderer/services/LessonService";
+import { GroupByResult } from "@renderer/utils/processing";
 import { disciplineService } from "@services/DisciplineService";
 import { createRef, CSSProperties, useCallback, useEffect, useState } from "react";
 import { Button, Col, Container, Form, Row } from "react-bootstrap";
@@ -14,19 +17,33 @@ const updateCheckRef = createRef<HTMLInputElement>()
 export default function DisciplinePage(): JSX.Element {
     const [status, setStatus] = useState<LoadingStatus>('loading')
     const [updateUuid, setUpdateUuid] = useState<string>(uuidv4())
-    const [disciplines, setDisciplines] = useState<IDisciplineInfo[] | null>(null)
+    
+    const [dispciplineGroups, setDisciplineGroups] = useState<GroupByResult<IGroupInfo>>()
+    const [disciplines, setDisciplines] = useState<IDisciplineInfo[]>([])
     const [selected, setSelected] = useState<IDisciplineInfo | null>(null)
     
     const navigator = useNavigate()
     useEffect(() => {
         (async() => {
-            setDisciplines((await disciplineService.getAllDisciplines()).data)
-        })()
-            .then(() => setStatus('success'))
-            .catch(error => {
-                if (typeof error == 'string' && error == 'Невозможно найти преподавателя по ИД') {
-                    navigator('/')
+            const disciplinesResponse = await disciplineService.getAllDisciplines()
+            setDisciplines(disciplinesResponse.data)
+
+            const grouping = { } as GroupByResult<IGroupInfo>
+            await Promise.all(disciplinesResponse.data.map(async (item) => {
+                if (!grouping[item.name]) grouping[item.name] = []
+                const lessonResponse = (await lessonService.getLessonsByDiscipline(item.id)).data
+
+                for (const lesson of lessonResponse) {
+                    for (const group of lesson.groups) {
+                        if (!grouping[item.name].some(it => it.id == group.id)) {
+                            grouping[item.name].push(group)
+                        }
+                    }
                 }
+            }))
+            setDisciplineGroups(grouping)
+        })().then(() => setStatus('success'))
+            .catch(error => {
                 console.log(error)
                 setStatus('failed')
             })
@@ -83,7 +100,7 @@ export default function DisciplinePage(): JSX.Element {
         <div style={pageHeaderStyle}>
             <h2 style={{display: 'inline-block'}}>Управление дисциплинами</h2>
         </div>
-        <Row className='gy-2 gy-lg-3 gx-3'>
+        <Row className='gy-2 gy-lg-3 gx-3 mt-3 mb-2 justify-content-center'>
             <Col sm={12} md={6} lg={4}>
                 <Form.Group>
                     <Form.Label>Название дисциплины:</Form.Label>
@@ -97,8 +114,8 @@ export default function DisciplinePage(): JSX.Element {
                 </Button>
             </Col>
         </Row>
-        <Row style={{margin: '10px 0px'}}>
-            <Col sm={12}>
+        <Row className='justify-content-center gy-2 gy-lg-3 gx-3 mb-4'>
+            <Col sm={12} md={6} lg={4}>
                 <Form.Check type='checkbox' disabled={selected == null} label='Обновление' 
                     ref={updateCheckRef} onChange={(event) => {
                         const { checked } = event.currentTarget
@@ -108,26 +125,48 @@ export default function DisciplinePage(): JSX.Element {
                     }}
                 />
             </Col>
+            <Col sm={12} md={6} lg={4}></Col>
         </Row>
-        <Row className='flex-grow-1'>
-            <Processing status={status}>
-                <CustomListGroup<IDisciplineInfo> 
-                    data={disciplines?.map(item => ({ data: item, name: `${item.name}`}) )} 
-                    menuItems={[
-                        {
-                            name: 'Перейти к урокам',
-                            onClick: (item) => navigator(`/lessons/${item.id}`)
-                        },
-                        {
-                            name: 'Выбрать дисциплину',
-                            onClick: (item) => onSelectDisciplineHandler(item)
-                        },
-                        {
-                            name: 'Удалить дисциплину',
-                            onClick: (item) => onRemoveDisciplineHandler(item.id)
-                        },
-                    ]} />
-            </Processing>
+        <Row className='flex-grow-1 justify-content-center'>
+            <Col sm={12} md={12} lg={8}>
+                <Processing status={status}>
+                    <AccordionList<IGroupInfo> listData={dispciplineGroups} contextMenu={(item, key) => {
+                        return [
+                            {
+                                name: 'Перейти к занятиям',
+                                onClick: () => {
+                                    const discipline = disciplines.find(it => it.name == key)
+                                    if (discipline) {
+                                        navigator(`/attendance/${discipline.id}/${item.id}`)
+                                    }
+                                    
+                                }
+                            }
+                        ]
+                    }} minListLines={5} actionMenu={key => {
+                        return [
+                            {
+                                name: 'Выбрать дисциплину',
+                                onClick: () => {
+                                    const discipline = disciplines.find(it => it.name == key)
+                                    if (discipline) onSelectDisciplineHandler(discipline)
+                                }
+                            },
+                            {
+                                name: 'Удалить дисциплину',
+                                onClick: () => {
+                                    const discipline = disciplines.find(it => it.name == key)
+                                    if (discipline) onRemoveDisciplineHandler(discipline.id)
+                                }
+                            },
+                            {
+                                name: 'Создать занятие',
+                                onClick: () => console.log(key)
+                            }
+                        ]
+                    }}/>
+                </Processing>
+            </Col>
         </Row>
     </Container>
     </div>

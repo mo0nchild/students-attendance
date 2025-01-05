@@ -1,134 +1,53 @@
-import ModalWindow from "@components/modal/ModalWindow";
-import Processing, { LoadingStatus } from "@components/processing/Processing";
-import CustomTable, { DataType, HeaderType } from "@components/table/CustomTable";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/explicit-function-return-type */
 import { useScanner } from "@core/hooks/scanner";
-import { INewAttendance } from "@core/models/attendance";
-import { IGroupInfo } from "@core/models/group";
-import { IStudentOnLesson } from "@core/models/lesson";
-import { attendanceService } from "@services/AttendanceService";
-import { lessonService } from "@services/LessonService";
-import { CSSProperties, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Accordion, Button, Col, Container, Dropdown, Row, Spinner } from "react-bootstrap";
+import ModalWindow from "@renderer/components/modal/ModalWindow";
+import { IDisciplineInfo } from "@renderer/models/discipline";
+import { IGroupInfo } from "@renderer/models/group";
+import { attendanceService } from "@renderer/services/AttendanceService";
+import { disciplineService } from "@renderer/services/DisciplineService";
+import { groupService } from "@renderer/services/GroupService";
+import { Children, CSSProperties, PropsWithChildren, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Button, Col, Container, Row, Spinner } from "react-bootstrap";
 import { useNavigate, useParams } from "react-router-dom";
 import { v4 as uuidv4 } from 'uuid'
+import { GroupAttendance } from "./components/GroupAttendance";
+import { NavigationTreeView } from "./components/NavigationTreeView";
+import { DisciplineSchedule } from "./components/DisciplineSchedule";
+import { LessonContextProvider, useLessonContext } from "./contexts/LessonContext";
+import LessonInfo from "./components/LessonInfo";
 
-const tableHeader: HeaderType[] = [
-    {
-        key: 'studentFIO',
-        name: 'ФИО студента'
-    },
-    {
-        key: 'groupInfo',
-        name: 'Группа'
-    }, 
-    {
-        key: 'time',
-        name: 'Время посещения',
-        formatter: (value) => {
-            return typeof value == 'string' 
-                ? (value.split('T').join(' ').split('-').join('.')) : ''
-        }
-    }
-]
-interface AttendanceTableInfo extends DataType {
-    studentFIO: string
-    groupInfo: string
-    time: string | undefined
-}
-function convertToTableInfo({ student, time }: IStudentOnLesson): AttendanceTableInfo {
-    const { name, surname, patronymic, group, id } = student
-    return {
-        groupInfo: `${group.faculty} ${group.name}`,
-        studentFIO: `${surname} ${name[0]}. ${patronymic[0]}.`,
-        id: id,
-        time: time == null ? 'Отсутствует' : time
-    }
-}
 type RfidScannerInfo = { code: string, time: Date }
 
-export default function AttendancePage(): JSX.Element {
-    const [ status, setStatus ] = useState<LoadingStatus>('loading')
-    const [ updateUuid, setUpdateUuid ] = useState<string>(uuidv4())
-    const [ attendances, setAttendances ] = useState<IStudentOnLesson[] | null>()
-    
-    const [ lesson, setLesson ] = useState<string | null>(null)
-    const [ lessonGroups, setLessonGroups ] = useState<IGroupInfo[] | null>(null)
+export default function AttendancePage(): JSX.Element {    
+    const [ discipline, setDiscipline ] = useState<IDisciplineInfo | null>(null)
+    const [ currentGroup, setCurrentGroup ] = useState<IGroupInfo | null>(null)
     
     const rfidCodes = useRef<RfidScannerInfo[]>([])
+    const lessonId = useRef<number>()
+
+    const [ updateUuid, setUpdateUuid ] = useState<string>(uuidv4())
     const [ scanning, setScanning ] = useState<boolean>(false)
-    const { lessonId, disciplineId } = useParams()
+    const { disciplineId, groupId } = useParams()
     const navigate = useNavigate()
     useEffect(() => {
-        if(!lessonId || !disciplineId) throw 'Не указан ИД занятия или дисциплины';
+        if(!disciplineId) throw 'Не указан ИД дисциплины';
+        if(!groupId) throw 'Не указан ИД группы';
         (async() => {
-            const attendancesResponse = (await lessonService.getInfo(parseInt(lessonId))).data
-            setAttendances(attendancesResponse)
+            const disciplineResponse = (await disciplineService.getAllDisciplines()).data
+                .find(it => it.id == parseInt(disciplineId!))
+            if (disciplineResponse != undefined) {
+                setDiscipline(disciplineResponse)
+            }
+            else throw 'Дисциплина не найдена'
+            const groupResponse = (await groupService.getAllGroups()).data.find(it => it.id == parseInt(groupId))
+            if (groupResponse != undefined) {
+                setCurrentGroup(groupResponse)
+            }
+            else throw 'Группа не найдена'
+        })().catch(error => console.log(error))
 
-            const lessonResponse = (await lessonService.getLessonsByDiscipline(parseInt(disciplineId!)))
-                .data.find(item => item.id == parseInt(lessonId))
-            if (lessonResponse != undefined) {
-                setLesson(lessonResponse.theme)
-            }
-            else throw 'Занятие не найдено'
-            setLessonGroups((() => {
-                const groups: IGroupInfo[] = [] 
-                for(const { student } of attendancesResponse) {
-                    if(!groups.some(item => item.id == student.group.id)) groups.push(student.group)
-                }
-                return groups
-            })())
-        })()
-            .then(() => setStatus('success'))
-            .catch(error => {
-                console.log(error)
-                setStatus('failed')
-            })
-    }, [disciplineId, lessonId, updateUuid])
-    const onRemoveAttendanceHandler = useCallback(async (id: number) => {
-        const { student } = attendances!.find(it => it.student.id == id)!
-        try {
-            if ((await attendanceService.removeAttendance(student.rfidCode, parseInt(lessonId!))).status == 200) {
-                
-                setUpdateUuid(uuidv4())
-            }
-        }
-        catch(error) {
-            alert('Ошибка выполнения запроса')
-            console.log(error)
-        }
-    }, [attendances, lessonId])
-    const onAcceptAttendanceHandler = useCallback(async (id: number) => {
-        const { student } = attendances!.find(it => it.student.id == id)!
-        const request: INewAttendance = {
-            lessonId: parseInt(lessonId!),
-            rfidCodes: [ 
-                {
-                    code: student.rfidCode,
-                    time: convertDateToString(new Date())
-                }
-            ]
-        }
-        try {
-            if ((await attendanceService.addAttendances(request)).status == 200) {
-                setUpdateUuid(uuidv4())
-            }
-        }
-        catch(error) {
-            alert('Ошибка выполнения запроса')
-            console.log(error)
-        }
-    }, [attendances, lessonId])
-    const onRemoveAllAttendanceHandler = useCallback(async () => {
-        try {
-            if ((await attendanceService.removeAllAttendances(parseInt(lessonId!))).status == 200) {
-                setUpdateUuid(uuidv4())
-            }
-        }
-        catch(error) {
-            alert('Ошибка выполнения запроса')
-            console.log(error)
-        }
-    }, [lessonId])
+    }, [disciplineId, updateUuid, groupId])
     useScanner(value => {
         if(value != undefined && value.length > 0) {
             rfidCodes.current.push({ code: value, time: new Date() })
@@ -139,91 +58,59 @@ export default function AttendancePage(): JSX.Element {
         if (activeElement instanceof HTMLElement) {
             activeElement.blur()
         }
-        if (!scanning && rfidCodes.current.length > 0) {
-            console.log(rfidCodes.current)
+        if (!scanning && rfidCodes.current.length > 0 && lessonId.current) {
             attendanceService.addAttendances({
-                lessonId: parseInt(lessonId!),
+                lessonId: lessonId.current,
                 rfidCodes: rfidCodes.current.map(item => {
                     return { code: item.code, time: convertDateToString(item.time) }
                 })
             })
                 .then(() => {
-                    alert('Запрос выполнен успешно')
                     setUpdateUuid(uuidv4())
+                    rfidCodes.current = []
                 })
                 .catch(error => {
                     console.log(error)
                     alert('Не удалось выполнить запрос')
                 })
         }
-    }, [lessonId, scanning])
-    const attendanceAllProcent = useMemo<number | undefined>(() => {
-        return !attendances ? undefined 
-            : attendances?.filter(item => item.time != null).length / attendances.length
-    }, [attendances]) 
+    }, [scanning])
     return (
     <div>
-    <Container fluid='md'>
-        <div style={pageHeaderStyle}>
-            <a style={headerLinkStyle} onClick={() => navigate(-1)}>&#8592;&nbsp;
-                <span style={{textDecoration: 'underline', textUnderlineOffset: '5px'}}>Назад</span>
-            </a>
-            <h2 style={{display: 'inline-block'}}>Управление занятием [{lesson}]</h2>
-        </div>
-        <Row className='gy-2 gy-lg-3 gx-3 mb-4 justify-content-center'>
-            <Col sm={12} md={6} lg={4}>
-                <Button style={{width: '100%'}} onClick={(event) => {
-                    event.currentTarget.blur()
-                    setScanning(true)
-                }}>
-                    Сканировать пропуски
-                </Button>
-            </Col>
-            <Col sm={12} md={6} lg={4}>
-                <Button style={{width: '100%'}} onClick={onRemoveAllAttendanceHandler}>
-                    Удалить все посещения
-                </Button>
-            </Col>
-        </Row>
-        <Row className='gy-2 gy-lg-3 gx-3 mb-4 justify-content-center'>
-            <Col sm={12} md={6} lg={4}>
-                <AnalyticGroupInfo groupsList={lessonGroups} attendances={attendances}/>
-            </Col>
-            <Col sm={12} md={6} lg={4}>
-                <Accordion>
-                    <Accordion.Item eventKey='1'>
-                        <Accordion.Header>Общая статистика</Accordion.Header>
-                        <Accordion.Body className='d-flex flex-column gap-2'>
-                            <div style={{color: 'white'}}>
-                                <p className='m-0'>
-                                    Процент посещения пары: {((attendanceAllProcent ?? 0) * 100).toFixed(2)}%
-                                </p>
+    <LessonContextProvider>
+        <Container fluid='md' className='mb-5'>
+            <div style={pageHeaderStyle}>
+                <a style={headerLinkStyle} onClick={() => navigate('/')}>&#8592;&nbsp;
+                    <span style={{textDecoration: 'underline', textUnderlineOffset: '5px'}}>Назад</span>
+                </a>
+                <h2 style={{display: 'inline-block'}}>Списки занятий [{discipline?.name}]</h2>
+            </div>
+            <Row className='justify-content-end'>
+                <Col sm={12} md={12} lg={4} xl={3}>
+                    <RenderRightMenu disciplineId={disciplineId}/>
+                </Col>
+                <Col sm={12} md={12} lg={8} xl={9} className='mb-4'>
+                    <><div className='mb-4'>
+                    {(() => {
+                        return currentGroup
+                            ? <GroupAttendance currentGroup={currentGroup} discipline={discipline!} 
+                                onScanning={id => {
+                                    lessonId.current = id
+                                    setScanning(true)
+                                }}/>
+                            : <div className='d-flex justify-content-center'>
+                                <p className='fs-3'>Выберите группу</p>
                             </div>
-                        </Accordion.Body>
-                    </Accordion.Item>
-                </Accordion>
-            </Col>
-        </Row>
-        <Row>
-            <Processing status={status}>
-                <div style={attendanceTableStyle}>
-                    <CustomTable header={tableHeader} data={attendances == null ? [] : attendances?.map(it => {
-                        return convertToTableInfo(it)
-                    })}
-                    contextMenu={[
-                        {
-                            name: 'Отметить студента',
-                            onClick: ({ id }) => onAcceptAttendanceHandler(id)
-                        },
-                        {
-                            name: 'Удалить посещение',
-                            onClick: ({ id }) => onRemoveAttendanceHandler(id)
-                        }
-                    ]}/>
-                </div>
-            </Processing>
-        </Row>
-    </Container>
+                    })()}
+                    </div>
+                    <Switcher>
+                        <DisciplineSchedule discipline={discipline} group={currentGroup}/>
+                        <LessonInfo group={currentGroup}/>
+                    </Switcher></>
+                </Col>
+            </Row>
+        </Container>
+    </LessonContextProvider>
     <ModalWindow isOpen={scanning} onClose={() => {
         setScanning(false)
         rfidCodes.current = []
@@ -237,8 +124,58 @@ export default function AttendancePage(): JSX.Element {
     </div>
     )
 }
-const attendanceTableStyle: CSSProperties = {
-    overflowX: 'auto'
+function Switcher({children}: PropsWithChildren): JSX.Element {
+    const [ schedulerComponent, lessonComponent ] = useMemo(() => {
+        const result = [] as JSX.Element[]
+        Children.forEach(children, (child => {
+            if ((child as any).type == DisciplineSchedule) result[0] = child! as JSX.Element
+            if ((child as any).type == LessonInfo) result[1] = child! as JSX.Element
+        }))
+        if (result.length < 2) throw Error('Switcher children is wrong type')
+        return result
+    }, [children])
+    const lessonContext = useLessonContext()
+    return lessonContext.selectedLessonId ? lessonComponent : schedulerComponent
+}
+interface RenderRightMenuProps { disciplineId: string | undefined }
+
+function RenderRightMenu({disciplineId}: RenderRightMenuProps): JSX.Element {
+    const { selectLesson } = useLessonContext()
+    const navigate = useNavigate()
+
+    const onChangeGroupHandler = useCallback((disciplineId: number, group: IGroupInfo) => {
+        selectLesson(undefined)
+        navigate(`/attendance/${disciplineId}/${group.id}`)
+    }, [selectLesson, navigate])
+    return (
+    <Container fluid >
+        <Row className='gy-2 gy-lg-3 gx-3 mb-4 justify-content-center'>
+            <Col sm={12} md={6} lg={12}>
+                <div style={treeViewStyle}>
+                    <p style={{marginBottom: '6px'}}>Дисциплины и группы:</p>
+                    <div style={{height: '1px', backgroundColor: 'white', marginBottom: '10px'}}></div>
+                    <NavigationTreeView onClick={onChangeGroupHandler}/>
+                </div>
+            </Col>
+            <Col sm={12} md={6} lg={12}>
+                <Button className='w-100' onClick={() => navigate(`/lessons/${disciplineId}`)}>
+                    Добавить занятие
+                </Button>
+            </Col>
+        </Row>
+    </Container>
+    )
+}
+
+function convertDateToString(date: Date): string {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0'); 
+    const day = String(date.getDate()).padStart(2, '0');
+
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
 }
 const pageHeaderStyle: CSSProperties = {
     marginBottom: '14px', 
@@ -254,63 +191,9 @@ const scannerModalStyle: CSSProperties = {
     alignItems: 'center',
     gap: '10px'
 }
-function convertDateToString(date: Date): string {
-
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0'); 
-    const day = String(date.getDate()).padStart(2, '0');
-
-    const hours = String(date.getHours()).padStart(2, '0');
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-
-    return `${year}-${month}-${day}T${hours}:${minutes}`;
-}
-interface AnalyticGroupInfoProps {
-    groupsList: IGroupInfo[] | null
-    attendances: IStudentOnLesson[] | undefined | null
-}
-function AnalyticGroupInfo({ groupsList, attendances } : AnalyticGroupInfoProps): JSX.Element {
-    const [ analyticGroup, setAnalyticGroup ] = useState<IGroupInfo | null>(null)
-    const selectedGroupName = useMemo(() => {
-        return analyticGroup == null ? 'Выберите группу' : (() => {
-            const { name, faculty } = analyticGroup
-            return `${faculty} ${name}`
-        })()
-    }, [analyticGroup])
-    const shitValue = useMemo(() => {
-        const filtered = attendances?.filter(({student}) => student.group.id == analyticGroup?.id)
-        return filtered ? { 
-            value: filtered?.filter(({time}) => time != null).length / filtered?.length
-        } : undefined
-    }, [analyticGroup, attendances])
-    return(
-    <div>
-    <Accordion defaultActiveKey={null} onSelect={item => {if(item == null) setAnalyticGroup(null)}}>
-        <Accordion.Item eventKey='0'>
-            <Accordion.Header>Статистика по группам</Accordion.Header>
-            <Accordion.Body className='d-flex flex-column gap-4'>
-                <Dropdown>
-                    <Dropdown.Toggle className='w-100'>{selectedGroupName}</Dropdown.Toggle>
-                    <Dropdown.Menu>
-                    {
-                        groupsList?.map((item, index) => {
-                            const { faculty, name } = item
-                            return (
-                            <Dropdown.Item key={`lesson-group#${index}`} onClick={() => setAnalyticGroup(item)}>
-                                {`${faculty} ${name}`}
-                            </Dropdown.Item>
-                            )
-                        })
-                    }
-                    </Dropdown.Menu>
-                </Dropdown>
-                <div style={{color: 'white'}}>
-                { !shitValue || analyticGroup == null ? <></> 
-                    : <p className='m-0'>Посещения от группы: {(shitValue.value * 100).toFixed(2)}%</p> }
-                </div>
-            </Accordion.Body>
-        </Accordion.Item>
-    </Accordion>
-    </div>
-    )
+const treeViewStyle: CSSProperties = {
+    backgroundColor: '#242424', 
+    padding: '16px',
+    borderRadius: '6px',
+    border: '1px solid white',
 }

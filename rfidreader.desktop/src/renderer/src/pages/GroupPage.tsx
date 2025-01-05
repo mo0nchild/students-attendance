@@ -1,10 +1,12 @@
+/* eslint-disable @typescript-eslint/explicit-function-return-type */
 import Processing, { LoadingStatus } from "@components/processing/Processing"
 import { IGroupInfo } from "@core/models/group"
-import { groupBy } from "@core/utils/processing"
+import { AccordionList, AccordionListData } from "@renderer/components/accordionList/AccordionList"
+import { groupBy } from "@renderer/utils/processing"
 import { groupService } from "@services/GroupService"
 import { studentService } from "@services/StudentService"
-import { createElement, createRef, CSSProperties, useCallback, useEffect, useState } from "react"
-import { Accordion, Button, Col, Container, Dropdown, Form, ListGroup, Row } from "react-bootstrap"
+import { createRef, CSSProperties, useCallback, useEffect, useMemo, useState } from "react"
+import { Button, Col, Container, Form, Row } from "react-bootstrap"
 import { useNavigate } from "react-router-dom"
 import { v4 as uuidv4 } from 'uuid'
 
@@ -15,8 +17,8 @@ const updateCheckRef = createRef<HTMLInputElement>()
 type StudentsInGroup = { count: number, id: number }
 
 export default function GroupPage(): JSX.Element {
-    const [groups, setGroups] = useState<IGroupInfo[] | null>(null)
-    const [selected, setSelected] = useState<IGroupInfo | null>(null)
+    const [groups, setGroups] = useState<IGroupInfo[]>()
+    const [selected, setSelected] = useState<IGroupInfo>()
     const [status, setStatus] = useState<LoadingStatus>('loading')
     const [updateUuid, setUpdateUuid] = useState<string>(uuidv4())
     const [studentsInGroup, setStudentsInGroup] = useState<StudentsInGroup[]>([])
@@ -90,82 +92,16 @@ export default function GroupPage(): JSX.Element {
     }, [selected, updateUuid])
     const clearInputForm = () => {
         updateCheckRef.current!.checked = false
-        setSelected(null)
+        setSelected(undefined)
     }
-    const renderGroupsList = (): JSX.Element => {
-        if (groups == null || groups.length <= 0) return (
-            <div className='d-flex flex-column align-items-center mt-5'>
-                <h4>Список групп пуст</h4>
-            </div>
-        )
-        const result = groupBy(groups, item => item.faculty)
-        return (
-        <Accordion>
-        {
-        Object.keys(result).map((item, index) => {
-            return (
-            <Accordion.Item key={`item#${index}`} eventKey={index.toString()}>
-                <Accordion.Header>{item}</Accordion.Header>
-                <Accordion.Body>
-                <ListGroup>
-                {
-                result[item].map((g, i) => {
-                    return (
-                    <ListGroup.Item key={`item#${index}-${i}`} className='d-flex justify-content-between'>
-                        <Dropdown>
-                            <Dropdown.Toggle style={dropDownStyle}>{g.name}</Dropdown.Toggle>
-                            <Dropdown.Menu>
-                                <Dropdown.Item href={`/students/${g.id}/${g.name}`}>
-                                    Перейти к группе
-                                </Dropdown.Item>
-                                <Dropdown.Item onClick={() => onSelectionHandler(g)}>
-                                    Выбрать группу
-                                </Dropdown.Item>
-                                <Dropdown.Item onClick={() => onRemoveGroupHandler(g)}>
-                                    Удалить группу
-                                </Dropdown.Item>
-                                {
-                                (() => {
-                                    const students = studentsInGroup.find(it => it.id == g.id)
-                                    if (students && students.count <= 0) {
-                                        return (
-                                            <Dropdown.Item onClick={() => onImportingHander(g.id)}>
-                                                Импортировать
-                                            </Dropdown.Item>
-                                        )
-                                    }
-                                    else return <></>
-                                })()
-                                }
-                            </Dropdown.Menu>
-                        </Dropdown>
-                        
-                        <div className='d-flex align-items-center'>
-                            <span>
-                                {`Кол-во студентов: ${studentsInGroup.find(it => it.id == g.id)?.count ?? 0}`}
-                            </span>
-                        </div>
-
-                    </ListGroup.Item>
-                    )
-                })
-                }
-                </ListGroup>
-                </Accordion.Body>
-            </Accordion.Item>
-            )
-        })
-        }
-        </Accordion>
-        )
-    }
+    const groupedByFaculty = useMemo(() => groups ? groupBy(groups, item => item.faculty) : undefined, [groups])
     return (
     <div>
     <Container fluid='md'>
         <div style={pageHeaderStyle}>
             <h2 style={{display: 'inline-block'}}>Управление группами</h2>
         </div>
-        <Row className='gy-2 gy-lg-3 gx-3'>
+        <Row className='gy-2 gy-lg-3 gx-3 mb-3 justify-content-center mt-4'>
             <Col sm={12} md={6} lg={4}>
                 <Form.Group>
                     <Form.Label>Название группы:</Form.Label>
@@ -182,8 +118,8 @@ export default function GroupPage(): JSX.Element {
                 </Form.Group>   
             </Col>
         </Row>
-        <Row style={{margin: '10px 0px 20px'}}>
-            <Col sm={6} md={6} lg={4}>
+        <Row className='gy-2 gy-lg-3 gx-3 mb-5 justify-content-center'>
+            <Col sm={6} md={6} lg={4} style={{padding: 'none'}}>
                 <Button style={{width: '100%'}} onClick={onApplyGroupHandler}>
                     { selected == null ? 'Добавить' : 'Обновить' }
                 </Button>
@@ -193,23 +129,58 @@ export default function GroupPage(): JSX.Element {
                     ref={updateCheckRef} onChange={(event) => {
                         const { checked } = event.currentTarget
                         if (checked == false && selected != null) {
-                            setSelected(null)
+                            setSelected(undefined)
                         }
                     }}
                 />
             </Col>
         </Row>
-        <Processing status={status}>{createElement(renderGroupsList)}</Processing>
+        <Row className='justify-content-center flex-grow-1'>
+            <Col sm={12} md={12} lg={8}>
+                <Processing status={status}>
+                    <AccordionList<IGroupInfo & AccordionListData> listData={groupedByFaculty} contextMenu={item => {
+                        return [
+                            {
+                                name: 'Перейти к группе',
+                                onClick: () => {
+                                    console.log(item)
+                                    navigator(`/students/${item.id}/${item.name}`)
+                                }
+                            },
+                            {
+                                name: 'Выбрать группу',
+                                onClick: () => onSelectionHandler(item)
+                            },
+                            {
+                                name: 'Удалить группу',
+                                onClick: () => onRemoveGroupHandler(item)
+                            },
+                            (() => {
+                                const students = studentsInGroup.find(it => it.id == item.id)
+                                if (students && students.count <= 0) {
+                                    return {
+                                        name: 'Импортировать',
+                                        onClick: () => onImportingHander(item.id)
+                                    }
+                                }
+                                else return undefined
+                            })()
+                        ]
+                    }}
+                    additionalInfo={item => {
+                        return `Кол-во студентов: ${studentsInGroup.find(it => it.id == item.id)?.count ?? 0}`   
+                    }} minListLines={5}/>
+                </Processing>
+            </Col>
+        </Row>
     </Container>
     </div>
     )
 }
+
+
+
+
 const pageHeaderStyle: CSSProperties = {
     marginBottom: '14px',  
-}
-const dropDownStyle: CSSProperties = {
-    width: '70%',
-    textAlign: 'start',
-    background: 'transparent',
-    border: 'none'
 }

@@ -58,6 +58,7 @@ class NewLesson (
     val groups: List<Long> = listOf()
 )
 data class LessonStudentInfo(
+    val lessonId: Long,
     @field:JsonFormat(pattern="yyyy-MM-dd'T'HH:mm")
     val time: LocalDateTime,
     val students: List<StudentOnLesson>

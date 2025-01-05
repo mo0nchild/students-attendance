@@ -101,7 +101,8 @@ open class LessonServiceImpl(
             if (attendances.isEmpty()) return@forEach
             students.add(LessonStudentInfo(
                 time = it.time,
-                students = attendances
+                students = attendances,
+                lessonId = it.id!!
             ))
         }
         return GroupAttendancesOnLesson(groupMapper.toGroupDto(group), students)

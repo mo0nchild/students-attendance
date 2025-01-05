@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/explicit-function-return-type */
 import { Table } from "react-bootstrap";
 import style from './CustomTable.module.css'
 import { CSSProperties, useCallback, useEffect, useMemo, useState } from "react";
@@ -23,7 +24,9 @@ export interface ICustomTableProps {
     header: HeaderType[]
     onClicked?: (data: DataType) => void
     contextMenu?: TableContextMenu[]
-    tableMinSize?: number
+    tableMinSize?: number,
+    striped?: boolean,
+    separators?: number[]
 }
 type ContextPosition = { x: number, y: number }
 type TableRowClickedEvent = React.MouseEvent<HTMLElement, MouseEvent>
@@ -32,7 +35,7 @@ const contextOffset = { offsetX: 10, offsetY: 30 }
 const tableMinSizeDefault = 5
 
 export default function CustomTable(props: ICustomTableProps): JSX.Element {
-    const { data, header, contextMenu, onClicked } = props
+    const { data, header, contextMenu, onClicked, striped, separators } = props
     const minSize = useMemo(() => {
         return props.tableMinSize == undefined ? tableMinSizeDefault : props.tableMinSize
     }, [props.tableMinSize])
@@ -49,7 +52,6 @@ export default function CustomTable(props: ICustomTableProps): JSX.Element {
             window.removeEventListener('click', windowClickHandler)
             window.removeEventListener('resize', windowClickHandler)
         }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
     const rowClickedHandler = useCallback((event: TableRowClickedEvent, item: DataType) => {
         event.stopPropagation()
@@ -68,30 +70,33 @@ export default function CustomTable(props: ICustomTableProps): JSX.Element {
     }, [contextMenu, contextPosition, onClicked])
     return (
     <div>
-    <Table striped bordered hover className={style.tableMain} variant='dark'>
+    <Table striped={striped ?? false} bordered hover className={style.tableMain} variant='dark'>
         <thead>
             <tr>{ header.map((item, index) => <th key={`table-header#${index}`}>{item.name}</th>) }</tr>
         </thead>
         <tbody key={uuidv4()}>
         {
         data.map((item, index) => {
+            const separatedStyle = separators && separators.some(it => it == index) && index != data.length - 1
+                ? { borderBottom: '3px solid darkorchid' } as CSSProperties
+                : { }
             return (
-            <tr key={`table-row#${index}`}>
+            <tr key={`table-row#${index}`} style={{...separatedStyle}}>
             { 
-                header.map((p, i) => {
-                    const value = (p.formatter == undefined ? item[p.key] : p.formatter(item[p.key] ?? ''))
-                    return (
-                    <td onClick={(event) => rowClickedHandler(event, item)} key={`tdata#${index}-${i}`}>
-                    {
-                        typeof value == 'string' 
-                            ? value.split('\n').map((out, t) => {
-                                return <p key={`insidelist#${index}-${i}-${t}`} className='m-0'>{out}</p>
-                            })
-                            : value
-                    }
-                    </td>
-                    )
-                }) 
+            header.map((p, i) => {
+                const value = (p.formatter == undefined ? item[p.key] : p.formatter(item[p.key] ?? ''))
+                return (
+                <td onClick={(event) => rowClickedHandler(event, item)} key={`tdata#${index}-${i}`}>
+                {
+                typeof value == 'string' 
+                    ? value.split('\n').map((out, t) => {
+                        return <p key={`insidelist#${index}-${i}-${t}`} className='m-0'>{out}</p>
+                    })
+                    : value
+                }
+                </td>
+                )
+            }) 
             }
             </tr>
             )

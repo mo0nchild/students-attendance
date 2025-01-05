@@ -6,7 +6,7 @@ export default function Header(): JSX.Element {
     <div className={style.headerRoot}>
         <Navbar expand='md' className={style.headerMain}>
         <Container fluid>
-            <Navbar.Brand href='/'>Посещения</Navbar.Brand>
+            <Navbar.Brand href='#/'>Посещения</Navbar.Brand>
             <Navbar.Toggle aria-controls='navbarScroll' />
             <Navbar.Offcanvas id='navbarScroll' placement='end'>
                 <Offcanvas.Header closeButton>
@@ -14,12 +14,12 @@ export default function Header(): JSX.Element {
                 </Offcanvas.Header>
                 <Offcanvas.Body className={style.navigation} >
                     <Nav navbarScroll>
-                        <Nav.Link className={style.navigationRef} href={'/'}>
+                        <Nav.Link className={style.navigationRef} href={'#/'}>
                             Ваши занятия
                         </Nav.Link>
                         <NavDropdown title="Функции" id="collapsible-nav-dropdown"
                                 className={style.navigationDropdown}>
-                            <NavDropdown.Item href="/groups">Управление студентами</NavDropdown.Item>
+                            <NavDropdown.Item href="#/groups">Управление студентами</NavDropdown.Item>
                         </NavDropdown>
                     </Nav>
                 </Offcanvas.Body>
