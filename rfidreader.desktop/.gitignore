@@ -3,3 +3,6 @@ dist
 out
 .DS_Store
 *.log*
+/resources/application.properties
+/resources/rfidreader-backend.jar
+mydatabase.db
