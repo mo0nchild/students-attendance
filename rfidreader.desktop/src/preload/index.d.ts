@@ -1,8 +1,9 @@
-import { ElectronAPI } from '@electron-toolkit/preload'
-
+/* eslint-disable prettier/prettier */
+import { ElectronAPI } from '@electron-toolkit/preload' 
+import { Api } from './typings'
 declare global {
-  interface Window {
-    electron: ElectronAPI
-    api: unknown
-  }
+    export interface Window {
+        electron: ElectronAPI
+        api: Api
+    }
 }

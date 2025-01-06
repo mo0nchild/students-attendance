@@ -3,25 +3,41 @@
 import Processing, { LoadingStatus } from "@renderer/components/processing/Processing"
 import { IDisciplineInfo } from "@renderer/models/discipline"
 import { IGroupInfo } from "@renderer/models/group"
-import { INewLesson } from "@renderer/models/lesson"
+import { ILessonInfo } from "@renderer/models/lesson"
 import { disciplineService } from "@renderer/services/DisciplineService"
 import { groupService } from "@renderer/services/GroupService"
 import { lessonService } from "@renderer/services/LessonService"
 import { studentService } from "@renderer/services/StudentService"
 import { createRef, CSSProperties, useCallback, useEffect, useRef, useState } from "react"
 import { Button, Col, Container, Form, ListGroup, Row } from "react-bootstrap"
-import { useNavigate, useParams } from "react-router-dom"
+import { useNavigate, useParams, useSearchParams } from "react-router-dom"
 
 const themeRef = createRef<HTMLInputElement>()
 const timeRef = createRef<HTMLInputElement>()
 
 export default function LessonPage(): JSX.Element {
-    const [ discipline, setDiscipline ] = useState<IDisciplineInfo>()
     const selectedGroups = useRef<IGroupInfo[]>([])
-    
+    const [ discipline, setDiscipline ] = useState<IDisciplineInfo>()
+    const [ currentLesson, setCurrentLesson ] = useState<ILessonInfo>()
+
     const { disciplineId } = useParams()
     const navigate = useNavigate()
-    
+
+    const [ searchParams ] = useSearchParams()
+    const lessonId = searchParams.get('lessonId')
+    useEffect(() => {
+        if (!disciplineId) throw 'Не указан ИД дисциплины';
+        (async () => {
+            const lesson = (await lessonService.getLessonsByDiscipline(parseInt(disciplineId))).data
+                .find(it => lessonId && it.id == parseInt(lessonId))
+            if (lesson) {
+                lesson.groups.forEach(it => {
+                    selectedGroups.current.push(it)
+                })
+            }
+            setCurrentLesson(lesson)
+        })().catch(error => console.log(error))
+    }, [lessonId, disciplineId])
     useEffect(() => {
         if (!disciplineId) throw 'Не указан ИД дисциплины';
         (async() => {
@@ -39,19 +55,34 @@ export default function LessonPage(): JSX.Element {
             theme: themeRef.current!.value,
             disciplineId: parseInt(disciplineId!),
             time: timeRef.current!.value,
-            groups: [ ...(selectedGroups.current.map(({ id }) => id)) ]
-        } as INewLesson
+        }
         try {
-            const response = await lessonService.addLesson(requestData)
-            if(response.status == 200) {
-                navigate(-1)
-            }
+            const response = !currentLesson ? await lessonService.addLesson({
+                ...requestData,
+                groups: [ ...(selectedGroups.current.map(({ id }) => id)) ]
+            }) : await lessonService.updateLesson({ 
+                ...requestData, 
+                id: currentLesson.id,
+                groupIds: [ ...(selectedGroups.current.map(({ id }) => id)) ] 
+            })
+            if(response.status == 200) navigate(-1)
         }
         catch (error) {
             alert('Ошибка выполнения запроса')
             console.log(error)
         }
-    }, [])
+    }, [disciplineId, currentLesson])
+    const onRemoveLessonHandler = useCallback(async () => {
+        if (!currentLesson) return;
+        try {
+            const response = await lessonService.removeLesson(currentLesson.id)
+            if (response.status == 200) navigate(-1)
+        }
+        catch (error) {
+            alert('Ошибка выполнения запроса')
+            console.log(error)
+        }
+    }, [currentLesson])
     const onSelectGroupHandler = useCallback((group: IGroupInfo) => {
         const index = selectedGroups.current.findIndex(item => item.id == group.id)
         if (index >= 0) {
@@ -72,24 +103,29 @@ export default function LessonPage(): JSX.Element {
             <Col sm={12} md={6} lg={4}>
                 <Form.Group>
                     <Form.Label>Тема урока:</Form.Label>
-                    <Form.Control type='text' maxLength={50} placeholder='Введите название темы' ref={themeRef}/>  
+                    <Form.Control type='text' maxLength={50} placeholder='Введите название темы' ref={themeRef}
+                        defaultValue={currentLesson ? currentLesson.theme : ''}/>  
                 </Form.Group> 
                 
             </Col>
             <Col sm={12} md={6} lg={4}>
                 <Form.Group>
                     <Form.Label>Время проведения:</Form.Label>
-                    <Form.Control type='datetime-local' maxLength={50} ref={timeRef}/>  
+                    <Form.Control type='datetime-local' maxLength={50} ref={timeRef}
+                        defaultValue={currentLesson ? currentLesson.time : ''}/>  
                 </Form.Group>   
             </Col>
         </Row>
         <Row className='gy-2 gy-lg-3 gx-3 mb-2 justify-content-center'>
             <Col sm={12} md={6} lg={4}>
-                <GroupListSelector onSelect={onSelectGroupHandler}/>
+                <GroupListSelector onSelect={onSelectGroupHandler} defaultGroups={currentLesson?.groups}/>
             </Col>
             <Col sm={12} md={6} lg={4}>
-                <Button className='w-100' onClick={onApplyLessonHandler}>
-                    Добавить занятие
+                <Button className='w-100 mb-3' onClick={onApplyLessonHandler}>
+                    { currentLesson ? 'Редактировать занятие' : 'Добавить занятие' }
+                </Button>
+                <Button className='w-100' onClick={onRemoveLessonHandler}>
+                    Удалить занятие
                 </Button>
             </Col>
         </Row>
@@ -99,9 +135,10 @@ export default function LessonPage(): JSX.Element {
 }
 
 interface GroupListSelectorProps {
-    onSelect?: (group: IGroupInfo) => void
+    onSelect?: (group: IGroupInfo) => void,
+    defaultGroups?: IGroupInfo[]
 }
-function GroupListSelector({ onSelect }: GroupListSelectorProps): JSX.Element {
+function GroupListSelector({ defaultGroups, onSelect }: GroupListSelectorProps): JSX.Element {
     const [ status, setStatus ] = useState<LoadingStatus>('loading')
     const [ groups, setGroups ] = useState<IGroupInfo[]>([])
     useEffect(() => {
@@ -132,7 +169,10 @@ function GroupListSelector({ onSelect }: GroupListSelectorProps): JSX.Element {
             groups.map((item, index) => {
                 return <ListGroup.Item key={`group-list-selector#${index}`}>
                     <Form.Check type='checkbox' label={`${item.faculty} ${item.name}`} 
-                        onChange={() => onSelect?.(item)}/>
+                        onChange={() => onSelect?.(item)}
+                        defaultChecked={
+                            defaultGroups ? !!defaultGroups.find(it => it.id == item.id) : false 
+                        }/>
                 </ListGroup.Item>
             })
             }

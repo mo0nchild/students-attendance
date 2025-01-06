@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
-import { StudentAttendance } from "@renderer/components/reportTable/ReportTable"
 import { INewAttendance } from "@renderer/models/attendance"
 import { IGroupAttendancesOnLesson } from "@renderer/models/lesson"
 import { attendanceService } from "@renderer/services/AttendanceService"
@@ -12,8 +11,8 @@ export type LessonSearchInfo = { disciplineId: number, groupId: number }
 export interface LessonContextType {
     setLessonSearchInfo: (info: LessonSearchInfo) => void,
 
-    setAttendance: (info: StudentAttendance & {lessonId: number}) => Promise<void>
-    removeAttendance: (info: StudentAttendance & {lessonId: number}) => Promise<void>
+    setAttendance: (rfidCode: string, lessonId: number) => Promise<void>
+    removeAttendance: (rfidCode: string, lessonId: number) => Promise<void>
     attendances: IGroupAttendancesOnLesson | undefined,
     
     selectedLessonId: number | undefined,
@@ -37,7 +36,7 @@ export function LessonContextProvider(props: LessonContextProviderProps): JSX.El
             setAttendances(lessonsResponse.data)
         })().catch(error => console.log(error))
     }, [searchInfo, updateUuid])
-    const setAttendance = useCallback(async({ lessonId, rfidCode }: StudentAttendance & {lessonId: number}) => {
+    const setAttendance = useCallback(async(rfidCode: string, lessonId: number) => {
         const request = {
             lessonId,
             rfidCodes: [ {code: rfidCode, time: convertDateToString(new Date())} ]
@@ -52,7 +51,7 @@ export function LessonContextProvider(props: LessonContextProviderProps): JSX.El
             console.log(error)
         }
     }, [])
-    const removeAttendance = useCallback(async({ rfidCode, lessonId }: StudentAttendance & {lessonId: number}) => {
+    const removeAttendance = useCallback(async(rfidCode: string, lessonId: number) => {
         try {
             if ((await attendanceService.removeAttendance(rfidCode, lessonId)).status == 200) {
                 setUpdateUuid(uuidv4())

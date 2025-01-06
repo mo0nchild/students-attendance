@@ -5,6 +5,7 @@ import { IDisciplineInfo } from "@renderer/models/discipline";
 import { IGroupInfo } from "@renderer/models/group";
 import { lessonService } from "@renderer/services/LessonService";
 import { useEffect, useState } from "react";
+import { useLessonContext } from "../contexts/LessonContext";
 
 const tableHeader: HeaderType[] = [
     {
@@ -36,6 +37,7 @@ export interface DisciplineScheduleProps {
 export function DisciplineSchedule({ discipline, group }: DisciplineScheduleProps): JSX.Element {
     const [ status, setStatus ] = useState<LoadingStatus>('loading')
     const [ schedules, setSchedules ] = useState<DisciplineTableInfo[]>([])
+    const { selectLesson } = useLessonContext()
     useEffect(() => {
         if (!discipline || !group) return
         (async() => {
@@ -48,7 +50,7 @@ export function DisciplineSchedule({ discipline, group }: DisciplineScheduleProp
                         time,
                         groups: groups.map(({faculty, name}) => `${faculty} ${name}`)
                     } as DisciplineTableInfo
-                })
+                }).sort((a, b) => b.time.localeCompare(a.time))
             setSchedules(schedulesList)
         })().then(() => setStatus('success'))
             .catch(error => {
@@ -57,8 +59,13 @@ export function DisciplineSchedule({ discipline, group }: DisciplineScheduleProp
             })
     }, [discipline, group])
     return (
-    <Processing status={status}>
-        <CustomTable data={schedules} header={tableHeader}/>
-    </Processing>
+    <div>
+        <h2 className='fs-4 mb-3'>Расписание занятий:</h2>
+        <Processing status={status}>
+            <CustomTable data={schedules} header={tableHeader} contextMenu={[
+                { name: 'Выбрать занятие', onClick: data => selectLesson(data.id) }
+            ]}/>
+        </Processing>
+    </div>
     )
 }

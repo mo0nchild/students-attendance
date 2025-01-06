@@ -2,6 +2,7 @@
 import Processing, { LoadingStatus } from "@components/processing/Processing"
 import { IGroupInfo } from "@core/models/group"
 import { AccordionList, AccordionListData } from "@renderer/components/accordionList/AccordionList"
+import { getStudentsFromString } from "@renderer/utils/fileSystem"
 import { groupBy } from "@renderer/utils/processing"
 import { groupService } from "@services/GroupService"
 import { studentService } from "@services/StudentService"
@@ -49,6 +50,8 @@ export default function GroupPage(): JSX.Element {
         updateCheckRef.current!.checked = true
     }, [])
     const onApplyGroupHandler = useCallback(async () => {
+        if (facultyRef.current!.value == '') return alert('Название факультета не установлено');
+        if (groupNameRef.current!.value == '') return alert('Название группы не установлено');
         const requestData = {
             faculty: facultyRef.current!.value,
             name: groupNameRef.current!.value
@@ -83,8 +86,17 @@ export default function GroupPage(): JSX.Element {
             console.log(error)
         }
     }, [])
-    const onImportingHander = useCallback((id: number) => {
-        navigator(`/importing/${id}`)
+    const onImportingHander = useCallback(async (id: number) => {
+        const filePath = await window.api.openFileDialog()
+        if (filePath) {
+            const text = await window.api.getFileData({ path: filePath })
+            const data = await getStudentsFromString(text)
+            if (data.length <= 0) {
+                alert('Импортированный список пуст')
+                return
+            }
+            navigator(`/importing/${id}`, { state: { filePath } })
+        }
     }, [navigator])
     useEffect(() => {
         groupNameRef.current!.value = (selected == null ? '' : selected.name)
@@ -160,7 +172,9 @@ export default function GroupPage(): JSX.Element {
                                 if (students && students.count <= 0) {
                                     return {
                                         name: 'Импортировать',
-                                        onClick: () => onImportingHander(item.id)
+                                        onClick: () => {
+                                            onImportingHander(item.id)
+                                        }
                                     }
                                 }
                                 else return undefined
@@ -177,10 +191,6 @@ export default function GroupPage(): JSX.Element {
     </div>
     )
 }
-
-
-
-
 const pageHeaderStyle: CSSProperties = {
     marginBottom: '14px',  
 }

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/explicit-function-return-type */
 import ModalWindow from "@components/modal/ModalWindow"
 import Processing, { LoadingStatus } from "@components/processing/Processing"
 import CustomTable, { DataType, HeaderType } from "@components/table/CustomTable"
@@ -9,7 +10,7 @@ import { studentService } from "@services/StudentService"
 import { AxiosError } from "axios"
 import { createRef, CSSProperties, useCallback, useEffect, useState } from "react" 
 import { Button, Col, Container, Dropdown, Form, Row, Spinner } from "react-bootstrap"
-import { useNavigate } from "react-router-dom"
+import { useLocation, useNavigate } from "react-router-dom"
 import { useParams } from "react-router-dom"
 import { v4 as uuidv4 } from 'uuid'
 
@@ -67,8 +68,12 @@ export default function StudentPage(): JSX.Element {
     const [ groups, setGroups ] = useState<IGroupInfo[]>()
     const [ selectedGroup, setSelectedGroup ] = useState<IGroupInfo | null>(null)
     const [ updateUuid, setUpdateUuid ] = useState<string>(uuidv4())
-    const { groupId, groupName } = useParams();
+    
+    const previousPage = useLocation().state?.previousPage as string | undefined
+    console.log(previousPage)
     const navigate = useNavigate()
+    const { groupId, groupName } = useParams()
+
     useEffect(() => {
         if(!groupId) throw 'Группа не указана'
         studentService.getStudentsByGroup(parseInt(groupId))
@@ -170,7 +175,10 @@ export default function StudentPage(): JSX.Element {
     <div>
     <Container fluid='sm'>
         <div style={pageHeaderStyle}>
-            <a style={headerLinkStyle} onClick={() => navigate('/groups')}>&#8592;&nbsp;
+            <a style={headerLinkStyle} onClick={() => {
+                if (previousPage) navigate(previousPage)
+                else navigate('/groups')
+            }}>&#8592;&nbsp;
                 <span style={{textDecoration: 'underline', textUnderlineOffset: '5px'}}>Назад</span>
             </a>
             <h2 style={{display: 'inline-block'}}>Управление студентами [{groupName}]</h2>

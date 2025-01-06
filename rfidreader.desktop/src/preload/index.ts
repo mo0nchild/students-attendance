@@ -1,12 +1,17 @@
-import { contextBridge } from 'electron'
+/* eslint-disable @typescript-eslint/triple-slash-reference */
+
+import { contextBridge, ipcRenderer } from 'electron'
 import { electronAPI } from '@electron-toolkit/preload'
+import { Api } from './typings'
 
-// Custom APIs for renderer
-const api = {}
-
-// Use `contextBridge` APIs to expose Electron APIs to
-// renderer only if context isolation is enabled, otherwise
-// just add to the DOM global.
+const api: Api = {
+  getFileData: async (info) => {
+    return await ipcRenderer.invoke('getFileData', info)
+  },
+  openFileDialog: async () => {
+    return await ipcRenderer.invoke('openFileDialog')
+  }
+}
 if (process.contextIsolated) {
   try {
     contextBridge.exposeInMainWorld('electron', electronAPI)

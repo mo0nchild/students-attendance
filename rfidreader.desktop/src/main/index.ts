@@ -1,12 +1,11 @@
 /* eslint-disable no-empty */
 /* eslint-disable prettier/prettier */
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
-import { app, shell, BrowserWindow, Tray, Menu } from 'electron'
+import { app, shell, BrowserWindow, Tray, Menu, ipcMain, dialog } from 'electron'
 import { join } from 'path'
-import { readFileSync } from 'fs'
+import { readFile, readFileSync } from 'fs'
 import { electronApp, optimizer } from '@electron-toolkit/utils'
 import { ChildProcess, execSync, spawn } from 'child_process'
-
 import icon from '../../resources/icon512.png?asset'
 
 let serverIsStarted: boolean = false
@@ -38,7 +37,8 @@ function createAppWindow(): BrowserWindow {
     ...{ icon },
     autoHideMenuBar: true,
     webPreferences: {
-      preload: join(__dirname, '../preload/index.js'),
+      preload: join(__dirname, './../preload/index.js'),
+      nodeIntegration: true
     }
   })
   mainWindow.webContents.setWindowOpenHandler((details) => {
@@ -50,6 +50,10 @@ function createAppWindow(): BrowserWindow {
   } else {
     mainWindow.loadFile(join(__dirname, '../renderer/index.html'), { hash: '/' })
   }
+  mainWindow.on('resize', () => mainWindow?.webContents.send('resize'))
+  mainWindow.on('unmaximize', () => mainWindow?.webContents.send('resize'))
+  mainWindow.on('maximize', () => mainWindow?.webContents.send('resize'))
+
   mainWindow.on('close', (event) => {
     if (mainWindow) {
       event.preventDefault()
@@ -69,9 +73,6 @@ function createPrepareWindow(): BrowserWindow {
     minimizable: false,
     autoHideMenuBar: true,
     ...{ icon },
-    webPreferences: {
-      preload: join(__dirname, '../preload/index.js'),
-    }
   })
   prepareWindow.setAlwaysOnTop(true, 'screen-saver')
   if (!app.isPackaged && process.env['ELECTRON_RENDERER_URL']) {
@@ -100,6 +101,26 @@ else app.whenReady().then(() => {
   })
   createAppWindow()
   createTray()
+  ipcMain.handle('getFileData', async (_, args: { path: string }) => {
+    const fileData = await new Promise<string>((resolve, reject) => {
+      readFile(args.path, { encoding: 'utf8' }, (error, data) => {
+        if (error) reject(error.message)
+        else resolve(data)
+      })
+    })
+    return fileData
+  })
+  ipcMain.handle('openFileDialog', async () => {
+    const { filePaths } = await dialog.showOpenDialog({ 
+      properties: ['openFile'],
+      filters: [
+        { name: 'Text file', extensions: ['txt'] }
+      ] 
+    })
+    if (filePaths.length <= 0) return undefined
+    return filePaths[0]
+  })
+  
   let prepareWindow = createPrepareWindow() as BrowserWindow | null
 
   prepareWindow!.on('show', function() {

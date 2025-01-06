@@ -1,15 +1,16 @@
+/* eslint-disable @typescript-eslint/explicit-function-return-type */
 import ModalWindow from "@components/modal/ModalWindow";
 import CustomTable, { DataType, HeaderType } from "@components/table/CustomTable";
 import { useScanner } from "@core/hooks/scanner";
 import { IGroupInfo } from "@core/models/group";
 import { INewStudent } from "@core/models/student";
-import { getStudentsFromFile, StudentFileData } from "@core/utils/fileSystem";
+import { getStudentsFromString, StudentFileData } from "@core/utils/fileSystem";
 import { groupService } from "@services/GroupService";
 import { studentService } from "@services/StudentService";
 import { AxiosError } from "axios";
 import { CSSProperties, useCallback, useEffect, useState } from "react";
 import { Button, Col, Container, Row, Spinner } from "react-bootstrap";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 
 const tableHeader: HeaderType[] = [
     {
@@ -36,11 +37,42 @@ export default function ImportingPage(): JSX.Element {
     const [ group, setGroup ] = useState<IGroupInfo | null>(null)
     const [ current, setCurrent ] = useState<number | null>(null) 
 
+    const [ currentFilePath, setCurrentFilePath ] = useState<string>()
     const [ scanning, setScanning ] = useState<boolean>(false)
+
+    const filePath = useLocation().state?.filePath as string | undefined
+    useEffect(() => {
+        if (!filePath) throw 'Не передан путь к файлу'
+        console.log(filePath)
+        setCurrentFilePath(filePath)
+    }, [filePath])
+    useEffect(() => {
+        if (!currentFilePath) return
+        (async() => {
+            const text = await window.api.getFileData({path: currentFilePath})
+            const data = await getStudentsFromString(text)
+            if (data.length <= 0) {
+                setCurrentFilePath(undefined)
+                alert('Импортированный список пуст')
+                return
+            }
+            setStudents(data.map((item, index) => ({ 
+                surname: item.surname,
+                name: item.name,
+                patronymic: item.patronymic, 
+                id: index,
+                rfid: null
+            }  as ImportingTableInfo)))
+        })().catch(error => console.log(error))
+    }, [currentFilePath])
+
     useScanner(value => {
         if(value != undefined && value.length > 0) {
             students[students.findIndex(it => it.id == current)].rfid = value
-
+            setStudents([ 
+                ...(students.filter(it => it.rfid)),
+                ...(students.filter(it => !it.rfid)) 
+            ])
             setScanning(false)
             setCurrent(null)
         }
@@ -59,18 +91,7 @@ export default function ImportingPage(): JSX.Element {
         setScanning(true)
     }, [])
     const onImportingHandler = useCallback(async () => {
-        const data = await getStudentsFromFile()
-        if (data.length <= 0) {
-            alert('Импортированный список пуст')
-            return
-        }
-        setStudents(data.map((item, index) => ({ 
-            surname: item.surname,
-            name: item.name,
-            patronymic: item.patronymic, 
-            id: index,
-            rfid: null
-        }  as ImportingTableInfo)))
+        setCurrentFilePath(await window.api.openFileDialog())
     }, [])
     const onAcceptImportHandler = useCallback(async () => {
         if (students.length <= 0) {
@@ -85,6 +106,7 @@ export default function ImportingPage(): JSX.Element {
                 name,
                 patronymic,
              }) as INewStudent)
+        console.log(newStudents)
         if (newStudents.length > 0) {
             try {
                 await studentService.addAllStudents(newStudents)

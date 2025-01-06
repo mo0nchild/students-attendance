@@ -97,6 +97,13 @@ export default function AttendancePage(): JSX.Element {
                                 onScanning={id => {
                                     lessonId.current = id
                                     setScanning(true)
+                                }}
+                                onGroupLinkClick={() => {
+                                    navigate(`/students/${currentGroup.id}/${currentGroup.name}`, {
+                                        state: {
+                                            previousPage: `/attendance/${disciplineId}/${currentGroup.id}`
+                                        }
+                                    })
                                 }}/>
                             : <div className='d-flex justify-content-center'>
                                 <p className='fs-3'>Выберите группу</p>
@@ -105,7 +112,11 @@ export default function AttendancePage(): JSX.Element {
                     </div>
                     <Switcher>
                         <DisciplineSchedule discipline={discipline} group={currentGroup}/>
-                        <LessonInfo group={currentGroup}/>
+                        <LessonInfo group={currentGroup} disciplineId={disciplineId ? parseInt(disciplineId) : undefined} 
+                            onScanning={id => {
+                                lessonId.current = id
+                                setScanning(true)
+                            }}/>
                     </Switcher></>
                 </Col>
             </Row>

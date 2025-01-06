@@ -35,7 +35,9 @@ class StudentServiceImpl(
     @Transactional
     override fun addAllStudents(newStudents: List<NewStudent>): Unit {
         for(item in newStudents) {
-           if (!newStudents.all { it.rfidCode != item.rfidCode }) throw ProcessException("RfidCode ${item.rfidCode} duplicate")
+           if (newStudents.filter { it.rfidCode == item.rfidCode }.size > 1) {
+               throw ProcessException("RfidCode ${item.rfidCode} duplicate")
+           }
         }
         newStudents.forEach { addStudent(it) }
     }

@@ -1,6 +1,24 @@
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 import { useEffect, useState } from "react"
 
+export interface ResolutionActionType {
+	onSmAction?: () => void,
+	onMdAction?: () => void,
+	onLgAction?: () => void
+}
+
+export default function useResolutions(actions: ResolutionActionType): void {
+	const breakpoint = useBreakpoints()
+	useEffect(() => {
+		switch(breakpoint) {
+			case 'sm': actions.onSmAction?.(); break
+			case 'md': actions.onMdAction?.(); break
+			case 'lg': actions.onLgAction?.(); break
+			default: actions.onLgAction?.()
+		}
+	}, [breakpoint])
+} 
+
 export type Breakpoint = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl'
 
 export const SIZE_XS: Breakpoint = 'xs'
@@ -21,15 +39,25 @@ const resolveBreakpoint = ( width: number ): Breakpoint => {
 		return SIZE_XL
 	} else return SIZE_XXL
 };
-
+const windowResizeEvent = new EventTarget()
+window.electron.ipcRenderer.on('resize', () => {
+	windowResizeEvent.dispatchEvent(new Event('resize'))
+})
 export function useBreakpoints(): Breakpoint {
-    const [size, setSize] = useState(() => resolveBreakpoint(window.innerWidth));
+    const [size, setSize] = useState(() => resolveBreakpoint(window.innerWidth))
+	useEffect(() => {
+		console.log(size, window.innerWidth)
+	}, [size])
 	useEffect(() => {
 		const calcInnerWidth = function() {
 			setSize(resolveBreakpoint(window.innerWidth))
 		}
 		window.addEventListener('resize', calcInnerWidth)
-		return () => window.removeEventListener('resize', calcInnerWidth)
+		windowResizeEvent.addEventListener('resize', calcInnerWidth)
+		return () => {
+			window.removeEventListener('resize', calcInnerWidth)
+			windowResizeEvent.removeEventListener('resize', calcInnerWidth)
+		}
 	}, [])
 	return size
 }

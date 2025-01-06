@@ -50,6 +50,7 @@ export default function DisciplinePage(): JSX.Element {
             console.log()
     }, [navigator, updateUuid])
     const onApplyDisciplineHandler = useCallback(async() => {
+        if (disciplineNameRef.current!.value == '') return alert('Название дисциплины не установлено');
         const requestData = { name: disciplineNameRef.current!.value }
         try {
             const response = selected == null ? await disciplineService.addDiscipline({...requestData}) 
@@ -94,6 +95,10 @@ export default function DisciplinePage(): JSX.Element {
         updateCheckRef.current!.checked = false
         setSelected(null)
     }
+    const usingDiscipline = (name: string, action: (discipline: IDisciplineInfo) => void) => {
+        const discipline = disciplines.find(it => it.name == name)
+        if (discipline) action(discipline)
+    }
     return (
     <div className='h-100'>
     <Container fluid='md' className='h-100 d-flex flex-column'>
@@ -130,38 +135,34 @@ export default function DisciplinePage(): JSX.Element {
         <Row className='flex-grow-1 justify-content-center'>
             <Col sm={12} md={12} lg={8}>
                 <Processing status={status}>
-                    <AccordionList<IGroupInfo> listData={dispciplineGroups} contextMenu={(item, key) => {
+                    <AccordionList<IGroupInfo> listData={dispciplineGroups} contextMenu={(group, key) => {
                         return [
                             {
                                 name: 'Перейти к занятиям',
-                                onClick: () => {
-                                    const discipline = disciplines.find(it => it.name == key)
-                                    if (discipline) {
-                                        navigator(`/attendance/${discipline.id}/${item.id}`)
-                                    }
-                                    
-                                }
+                                onClick: () => usingDiscipline(key, discipline => {
+                                    navigator(`/attendance/${discipline.id}/${group.id}`)
+                                })
                             }
                         ]
                     }} minListLines={5} actionMenu={key => {
                         return [
                             {
                                 name: 'Выбрать дисциплину',
-                                onClick: () => {
-                                    const discipline = disciplines.find(it => it.name == key)
-                                    if (discipline) onSelectDisciplineHandler(discipline)
-                                }
+                                onClick: () => usingDiscipline(key, discipline => {
+                                    onSelectDisciplineHandler(discipline)
+                                })
                             },
                             {
                                 name: 'Удалить дисциплину',
-                                onClick: () => {
-                                    const discipline = disciplines.find(it => it.name == key)
-                                    if (discipline) onRemoveDisciplineHandler(discipline.id)
-                                }
+                                onClick: () => usingDiscipline(key, discipline => {
+                                    onRemoveDisciplineHandler(discipline.id)
+                                })
                             },
                             {
                                 name: 'Создать занятие',
-                                onClick: () => console.log(key)
+                                onClick: () => usingDiscipline(key, discipline => {
+                                    navigator(`/lessons/${discipline.id}`)
+                                })
                             }
                         ]
                     }}/>
