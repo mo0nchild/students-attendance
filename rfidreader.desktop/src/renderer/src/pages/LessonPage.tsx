@@ -124,9 +124,12 @@ export default function LessonPage(): JSX.Element {
                 <Button className='w-100 mb-3' onClick={onApplyLessonHandler}>
                     { currentLesson ? 'Редактировать занятие' : 'Добавить занятие' }
                 </Button>
-                <Button className='w-100' onClick={onRemoveLessonHandler}>
-                    Удалить занятие
-                </Button>
+                {
+                !lessonId ? <></> 
+                    : <Button className='w-100' onClick={onRemoveLessonHandler}>
+                        Удалить занятие
+                    </Button> 
+                }
             </Col>
         </Row>
     </Container>
