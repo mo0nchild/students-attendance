@@ -18,8 +18,12 @@
 
 ### Сборка приложения
 
-1. Склонируйте этот репозиторий:
-```git clone https://gitverse.ru/byterbrod387/rfid-students.git```
+1. Склонируйте этот репозиторий и перейдите в ветку __desktop__:
+```powershell
+    git clone https://gitverse.ru/byterbrod387/rfid-students.git
+    git checkout desktop
+```
+
 
 2. Восстановите зависимости (Powershell)
 
