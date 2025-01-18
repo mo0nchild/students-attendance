@@ -30,6 +30,11 @@ export default defineConfig({
         '@hooks': resolve('src/renderer/src/hooks')
       }
     },
-    plugins: [react()]
+    plugins: [react()],
+    server: {
+      host: '0.0.0.0',
+      cors: true,
+      port: 5173,
+    },
   }
 })
