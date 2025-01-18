@@ -3,6 +3,7 @@ class ConfigData {
     [ValidateNotNullOrEmpty()][string]$JavaHome
     [ValidateNotNullOrEmpty()][string]$MavenPath
 }
+$currentPath = Get-Location
 $config = [ConfigData](Get-Content $PSScriptRoot\configuration.json | Out-String | ConvertFrom-Json)
 
 [System.Environment]::SetEnvironmentVariable("JAVA_HOME", $config.JavaHome, [System.EnvironmentVariableTarget]::Process)
@@ -13,6 +14,6 @@ Invoke-Command -ScriptBlock { & $mvn clean package }
 
 Set-Location $PSScriptRoot\..\
 Copy-Item .\rfidreader.server\target\rfidreader-backend.jar .\rfidreader.desktop\resources\ -Force
-Copy-Item .\build-scripts\application.properties .\rfidreader.desktop\resources\ -Force
+Copy-Item .\rfidreader.server\target\classes\application.properties .\rfidreader.desktop\resources\ -Force
 
-Set-Location $PSScriptRoot
+Set-Location $currentPath.Path
