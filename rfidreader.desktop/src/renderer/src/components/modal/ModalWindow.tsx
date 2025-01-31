@@ -28,8 +28,8 @@ export default function ModalWindow(props: ModalWindowProps): JSX.Element {
             <CloseButton style={{
                 width: '1.1rem',
                 height: '1.1rem',
-                backgroundSize: '100% 100%'
-            }} onClick={onClose}/>
+                backgroundSize: '100% 100%',
+            }} onMouseDown={onClose}/>
         </div>
         <div style={{width: '100%', height: '1px', backgroundColor: '#FFF'}}></div>
         <div style={{marginTop: '20px'}}>{ children }</div>
