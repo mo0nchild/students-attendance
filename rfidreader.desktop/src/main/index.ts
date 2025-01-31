@@ -53,7 +53,10 @@ function createAppWindow(): BrowserWindow {
   mainWindow.on('resize', () => mainWindow?.webContents.send('resize'))
   mainWindow.on('unmaximize', () => mainWindow?.webContents.send('resize'))
   mainWindow.on('maximize', () => mainWindow?.webContents.send('resize'))
-
+  ipcMain.on('focus-fix', () => {
+    mainWindow?.blur()
+    mainWindow?.focus()
+  })
   mainWindow.on('close', (event) => {
     if (mainWindow) {
       event.preventDefault()

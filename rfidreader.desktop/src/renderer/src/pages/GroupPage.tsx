@@ -50,8 +50,14 @@ export default function GroupPage(): JSX.Element {
         updateCheckRef.current!.checked = true
     }, [])
     const onApplyGroupHandler = useCallback(async () => {
-        if (facultyRef.current!.value == '') return alert('Название факультета не установлено');
-        if (groupNameRef.current!.value == '') return alert('Название группы не установлено');
+        if (facultyRef.current!.value == '') {
+            alert('Название факультета не установлено')
+            return window.electron.ipcRenderer.send('focus-fix')
+        }
+        if (groupNameRef.current!.value == '') {
+            alert('Название группы не установлено')
+            return window.electron.ipcRenderer.send('focus-fix')
+        }
         const requestData = {
             faculty: facultyRef.current!.value,
             name: groupNameRef.current!.value
@@ -70,6 +76,7 @@ export default function GroupPage(): JSX.Element {
         }
         catch(error) {
             alert('Ошибка выполнения запроса')
+            window.electron.ipcRenderer.send('focus-fix')
             console.log(error)
         }
     }, [selected])
@@ -83,6 +90,7 @@ export default function GroupPage(): JSX.Element {
         }
         catch(error) {
             alert('Ошибка выполнения запроса')
+            window.electron.ipcRenderer.send('focus-fix')
             console.log(error)
         }
     }, [])
@@ -93,7 +101,7 @@ export default function GroupPage(): JSX.Element {
             const data = await getStudentsFromString(text)
             if (data.length <= 0) {
                 alert('Импортированный список пуст')
-                return
+                return  window.electron.ipcRenderer.send('focus-fix')
             }
             navigator(`/importing/${id}`, { state: { filePath } })
         }

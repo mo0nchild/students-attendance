@@ -72,6 +72,7 @@ export default function AttendancePage(): JSX.Element {
                 .catch(error => {
                     console.log(error)
                     alert('Не удалось выполнить запрос')
+                    window.electron.ipcRenderer.send('focus-fix')
                 })
         }
     }, [scanning])

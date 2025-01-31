@@ -10,10 +10,14 @@ export interface ModalWindowProps {
 }
 export default function ModalWindow(props: ModalWindowProps): JSX.Element {
     const { isOpen, children, onClose } = props
-    const dialogRef = createRef<HTMLDialogElement>();
+    const dialogRef = createRef<HTMLDialogElement>()
     useEffect(() => {
-        if(isOpen) dialogRef.current?.showModal();
-        else dialogRef.current?.close();
+        if(isOpen) dialogRef.current?.showModal()
+        else dialogRef.current?.close()
+
+        return () => {
+            dialogRef.current?.close()
+        }
     }, [dialogRef, isOpen])
     return (
     <dialog ref={dialogRef} className={style['modal-window']}>

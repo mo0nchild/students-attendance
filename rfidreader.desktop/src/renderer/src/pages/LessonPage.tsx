@@ -49,8 +49,14 @@ export default function LessonPage(): JSX.Element {
         })()
     }, [disciplineId])
     const onApplyLessonHandler = useCallback(async () => {
-        if (timeRef.current!.value == '') return alert('Время занятия не установлено');
-        if (themeRef.current!.value == '') return alert('Тема занятия не установлена');
+        if (timeRef.current!.value == '') {
+            alert('Время занятия не установлено')
+            return window.electron.ipcRenderer.send('focus-fix')
+        }
+        if (themeRef.current!.value == '') {
+            alert('Тема занятия не установлена')
+            return window.electron.ipcRenderer.send('focus-fix')
+        }
         const requestData = {
             theme: themeRef.current!.value,
             disciplineId: parseInt(disciplineId!),
@@ -69,6 +75,7 @@ export default function LessonPage(): JSX.Element {
         }
         catch (error) {
             alert('Ошибка выполнения запроса')
+            window.electron.ipcRenderer.send('focus-fix')
             console.log(error)
         }
     }, [disciplineId, currentLesson])
@@ -80,6 +87,7 @@ export default function LessonPage(): JSX.Element {
         }
         catch (error) {
             alert('Ошибка выполнения запроса')
+            window.electron.ipcRenderer.send('focus-fix')
             console.log(error)
         }
     }, [currentLesson])

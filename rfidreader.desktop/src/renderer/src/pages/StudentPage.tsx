@@ -109,7 +109,7 @@ export default function StudentPage(): JSX.Element {
     const onApplyStudentHandler = useCallback(async () => {
         if (rfidValue == null || rfidValue.length <= 0) {
             alert('Значение код пропуска не установлено')
-            return
+            return window.electron.ipcRenderer.send('focus-fix')
         }
         const requestData = {
             surname: surnameRef.current!.value,
@@ -129,6 +129,7 @@ export default function StudentPage(): JSX.Element {
             })
             if (response.status == 200) {
                 alert('Запрос успешно выполнен')
+                window.electron.ipcRenderer.send('focus-fix')
                 setUpdateUuid(uuidv4())
                 clearInputForm()
             }
@@ -140,6 +141,7 @@ export default function StudentPage(): JSX.Element {
                 }
             }
             else alert('Ошибка выполнения запроса')
+            window.electron.ipcRenderer.send('focus-fix')
             console.log(error)
         }
     }, [groupId, rfidValue, selected, selectedGroup])
@@ -147,6 +149,7 @@ export default function StudentPage(): JSX.Element {
         if(selected != null) {
             if ((await studentService.removeStudent(selected.id)).status == 200) {
                 alert('Запрос успешно выполнен')
+                window.electron.ipcRenderer.send('focus-fix')
                 setUpdateUuid(uuidv4())
                 clearInputForm()
             }

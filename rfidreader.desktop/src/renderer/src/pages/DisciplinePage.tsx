@@ -50,7 +50,10 @@ export default function DisciplinePage(): JSX.Element {
             console.log()
     }, [navigator, updateUuid])
     const onApplyDisciplineHandler = useCallback(async() => {
-        if (disciplineNameRef.current!.value == '') return alert('Название дисциплины не установлено');
+        if (disciplineNameRef.current!.value == '') {
+            alert('Название дисциплины не установлено')
+            return window.electron.ipcRenderer.send('focus-fix')
+        }
         const requestData = { name: disciplineNameRef.current!.value }
         try {
             const response = selected == null ? await disciplineService.addDiscipline({...requestData}) 
@@ -65,6 +68,7 @@ export default function DisciplinePage(): JSX.Element {
         }
         catch(error) {
             alert('Ошибка выполнения запроса')
+            window.electron.ipcRenderer.send('focus-fix')
             console.log(error)
         }
     }, [selected])
@@ -85,6 +89,7 @@ export default function DisciplinePage(): JSX.Element {
         }
         catch(error) {
             alert('Ошибка выполнения запроса')
+            window.electron.ipcRenderer.send('focus-fix')
             console.log(error)
         }
     }, [])

@@ -54,7 +54,7 @@ export default function ImportingPage(): JSX.Element {
             if (data.length <= 0) {
                 setCurrentFilePath(undefined)
                 alert('Импортированный список пуст')
-                return
+                return window.electron.ipcRenderer.send('focus-fix')
             }
             setStudents(data.map((item, index) => ({ 
                 surname: item.surname,
@@ -96,7 +96,7 @@ export default function ImportingPage(): JSX.Element {
     const onAcceptImportHandler = useCallback(async () => {
         if (students.length <= 0) {
             alert('Список студентов пуст')
-            return
+            return window.electron.ipcRenderer.send('focus-fix')
         }
         const newStudents = students.filter(it => it.rfid != null)
             .map(({ name, surname, patronymic, rfid }) => ({ 
@@ -116,13 +116,17 @@ export default function ImportingPage(): JSX.Element {
                     const checkError = /^RfidCode (?<rfid>\w+) duplicate$/g.exec(error.response.data)
                     if (checkError && checkError.groups) {
                         alert(`Дублирование код пропуска: ${checkError.groups.rfid}`)
+                        window.electron.ipcRenderer.send('focus-fix')
                     }
                 }
                 return
             }
             navigate(`/students/${groupId}/${group?.name}`)
         }
-        else alert(`Ни у одного студента не указан код пропуска`)
+        else {
+            alert(`Ни у одного студента не указан код пропуска`)
+            window.electron.ipcRenderer.send('focus-fix')
+        }
     }, [group?.name, groupId, navigate, students])
     return (
     <div>

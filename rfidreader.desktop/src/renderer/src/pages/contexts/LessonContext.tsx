@@ -48,6 +48,7 @@ export function LessonContextProvider(props: LessonContextProviderProps): JSX.El
         }
         catch(error) {
             alert('Ошибка выполнения запроса')
+            window.electron.ipcRenderer.send('focus-fix')
             console.log(error)
         }
     }, [])
@@ -59,6 +60,7 @@ export function LessonContextProvider(props: LessonContextProviderProps): JSX.El
         }
         catch(error) {
             alert('Ошибка выполнения запроса')
+            window.electron.ipcRenderer.send('focus-fix')
             console.log(error)
         }
     }, [])
