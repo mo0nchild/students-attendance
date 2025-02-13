@@ -103,7 +103,7 @@ export default function LessonPage(): JSX.Element {
     <Container fluid='md'>
         <div style={pageHeaderStyle}>
             <a style={headerLinkStyle} onClick={() => navigate(-1)}>&#8592;&nbsp;
-                <span style={{textDecoration: 'underline', textUnderlineOffset: '5px'}}>Назад</span>
+                <span style={{textDecoration: 'underline', textUnderlineOffset: '5px', cursor: 'pointer'}}>Назад</span>
             </a>
             <h2 style={{display: 'inline-block'}}>Управление уроком [{discipline?.name}]</h2>
         </div>

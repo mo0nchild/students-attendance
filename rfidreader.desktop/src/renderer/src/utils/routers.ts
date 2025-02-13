@@ -22,7 +22,7 @@ export const routers = createHashRouter([
         element: createElement(GroupPage)
     },
     {
-        path: '/students/:groupId/:groupName',
+        path: '/students/:groupId/:groupName/:studentId?',
         element: createElement(StudentPage)
     },
     {

@@ -7,7 +7,7 @@ import { IGroupInfo } from "@renderer/models/group";
 import { attendanceService } from "@renderer/services/AttendanceService";
 import { disciplineService } from "@renderer/services/DisciplineService";
 import { groupService } from "@renderer/services/GroupService";
-import { Children, CSSProperties, PropsWithChildren, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Children, createRef, CSSProperties, PropsWithChildren, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Button, Col, Container, Row, Spinner } from "react-bootstrap";
 import { useNavigate, useParams } from "react-router-dom";
 import { v4 as uuidv4 } from 'uuid'
@@ -16,8 +16,12 @@ import { NavigationTreeView } from "./components/NavigationTreeView";
 import { DisciplineSchedule } from "./components/DisciplineSchedule";
 import { LessonContextProvider, useLessonContext } from "./contexts/LessonContext";
 import LessonInfo from "./components/LessonInfo";
+import Notifications, { NotificationsHandler } from "@renderer/components/notifications/Notifications";
+import { useBreakpoints } from "@renderer/hooks/breakpoints";
+import { studentService } from "@renderer/services/StudentService";
 
 type RfidScannerInfo = { code: string, time: Date }
+const notificationRef = createRef<NotificationsHandler>()
 
 export default function AttendancePage(): JSX.Element {    
     const [ discipline, setDiscipline ] = useState<IDisciplineInfo | null>(null)
@@ -30,6 +34,29 @@ export default function AttendancePage(): JSX.Element {
     const [ scanning, setScanning ] = useState<boolean>(false)
     const { disciplineId, groupId } = useParams()
     const navigate = useNavigate()
+    const breakpoint = useBreakpoints()
+    useEffect(() => {
+        const block = document.getElementById('fixed-col')!
+        const parent = block.parentElement!;
+        const handleScroll = () => {
+            const parentRect = parent.getBoundingClientRect()
+            const blockHeight = block.offsetHeight
+            if (parentRect.top <= 20 && parentRect.bottom - blockHeight > 20
+                && (breakpoint == 'lg' || breakpoint == 'xxl' || breakpoint == 'xl') 
+            ) {
+                block.style.position = 'absolute';
+                block.style.top = window.scrollY - parent.offsetTop + 220 + 'px';
+                block.style.width = '290px'
+            } else {
+                block.style.position = 'static';
+                block.style.width = '100%'
+            }
+        }
+        document.getElementById('page-content')?.addEventListener('scroll', handleScroll)
+        return () => {
+            document.getElementById('page-content')?.removeEventListener('scroll', handleScroll)
+        };
+    }, [breakpoint])
     useEffect(() => {
         if(!disciplineId) throw 'Не указан ИД дисциплины';
         if(!groupId) throw 'Не указан ИД группы';
@@ -50,7 +77,17 @@ export default function AttendancePage(): JSX.Element {
     }, [disciplineId, updateUuid, groupId])
     useScanner(value => {
         if(value != undefined && value.length > 0) {
-            rfidCodes.current.push({ code: value, time: new Date() })
+            rfidCodes.current.push({ code: value, time: new Date() });
+            (async () => {
+                const student = (await studentService.getStudentByRfidCode(value)).data
+                notificationRef.current!.add(` 
+                    ${student.surname} ${student.name} ${student.patronymic},
+                    ${student.group.faculty} ${student.group.name}
+                    ${new Date().toLocaleTimeString()}
+                `)
+            })().catch(error => {
+                console.log(error)
+            })
         }
     }, scanning)
     useEffect(() => {
@@ -82,13 +119,15 @@ export default function AttendancePage(): JSX.Element {
         <Container fluid='md' className='mb-5'>
             <div style={pageHeaderStyle}>
                 <a style={headerLinkStyle} onClick={() => navigate('/')}>&#8592;&nbsp;
-                    <span style={{textDecoration: 'underline', textUnderlineOffset: '5px'}}>Назад</span>
+                    <span style={{textDecoration: 'underline', textUnderlineOffset: '5px', cursor: 'pointer'}}>Назад</span>
                 </a>
                 <h2 style={{display: 'inline-block'}}>Списки занятий [{discipline?.name}]</h2>
             </div>
             <Row className='justify-content-end'>
                 <Col sm={12} md={12} lg={4} xl={3}>
-                    <RenderRightMenu disciplineId={disciplineId}/>
+                    <div id='fixed-col'>
+                        <RenderRightMenu disciplineId={disciplineId}/>
+                    </div>
                 </Col>
                 <Col sm={12} md={12} lg={8} xl={9} className='mb-4'>
                     <><div className='mb-4'>
@@ -132,6 +171,7 @@ export default function AttendancePage(): JSX.Element {
             <p>Сканирование пропусков...</p>
             <Button onClick={() => setScanning(false)}>Зарегистрировать посещения</Button>
         </div>
+        <Notifications ref={notificationRef}/>
     </ModalWindow>
     </div>
     )

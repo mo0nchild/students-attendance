@@ -2,10 +2,14 @@ package com.rfidreader.controllers
 
 import com.rfidreader.services.students.StudentServiceImpl
 import com.rfidreader.services.students.models.NewStudent
+import com.rfidreader.services.students.models.SearchStudentInfo
 import com.rfidreader.services.students.models.StudentDto
 import com.rfidreader.services.students.models.UpdateStudent
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
+import java.net.URLDecoder
+import java.nio.charset.StandardCharsets
+import java.util.Locale
 
 @RestController
 @RequestMapping("/api/students")
@@ -41,5 +45,14 @@ class StudentController(private val studentService: StudentServiceImpl) {
     @GetMapping("/getAll/group/{id}")
     fun getStudentsByGroupId(@PathVariable id: Long): ResponseEntity<List<StudentDto>> {
         return ResponseEntity.ok(studentService.getStudentsByGroupId(id))
+    }
+    @GetMapping("/find/{fio}")
+    fun findStudentsByFio(@PathVariable fio: String): ResponseEntity<Any> {
+        return ResponseEntity.ok(studentService.findStudentByFio(URLDecoder.decode(fio, StandardCharsets.UTF_8)))
+    }
+    @GetMapping("/get/rfidCode")
+    fun getStudentsByRfidCode(@RequestParam rfidCode: String): ResponseEntity<StudentDto> {
+        val decodedRfidCode = URLDecoder.decode(rfidCode, StandardCharsets.UTF_8)
+        return ResponseEntity.ok(studentService.getStudentByRfidCode(decodedRfidCode))
     }
 }

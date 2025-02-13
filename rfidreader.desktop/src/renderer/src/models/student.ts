@@ -23,3 +23,7 @@ export interface IUpdateStudent {
     groupId: number
     rfidCode: string
 }
+export interface ISearchInfo {
+    students: IStudentInfo[],
+    group: IGroupInfo
+}

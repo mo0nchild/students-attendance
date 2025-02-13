@@ -24,3 +24,14 @@
         padding: 0px 20px;
     }
 }
+.sortingArrow {
+    background-image: url('data:image/svg+xml,<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8 2V12" stroke="white" stroke-width="2" stroke-linecap="round"/><path d="M4 8L8 12L12 8" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    height: 20px;
+    aspect-ratio: 1 / 1;
+}
+.sortingArrowIsToggled {
+    transform: rotate(180deg);
+}

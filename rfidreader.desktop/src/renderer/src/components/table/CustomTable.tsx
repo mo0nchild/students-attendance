@@ -27,6 +27,7 @@ export interface ICustomTableProps {
     tableMinSize?: number,
     striped?: boolean,
     separators?: number[]
+    defaultSort?: SortingColumnInfo
 }
 type ContextPosition = { x: number, y: number }
 type TableRowClickedEvent = React.MouseEvent<HTMLElement, MouseEvent>
@@ -34,6 +35,10 @@ type TableRowClickedEvent = React.MouseEvent<HTMLElement, MouseEvent>
 const contextOffset = { offsetX: 10, offsetY: 30 }
 const tableMinSizeDefault = 5
 
+type SortingColumnInfo = {
+    columnName: string,
+    sortDirection: 'up' | 'down'
+}
 export default function CustomTable(props: ICustomTableProps): JSX.Element {
     const { data, header, contextMenu, onClicked, striped, separators } = props
     const minSize = useMemo(() => {
@@ -42,6 +47,7 @@ export default function CustomTable(props: ICustomTableProps): JSX.Element {
 
     const [ contextPosition, setContextPosition ] = useState<ContextPosition | null>(null)
     const [ selected, setSelected ] = useState<DataType | null>()
+    const [ sortingColumn, setSortingColumn ] = useState<SortingColumnInfo | undefined>(props.defaultSort)
     const windowClickHandler = () => {
         if (contextMenu != undefined) setContextPosition(null)
     }
@@ -68,15 +74,54 @@ export default function CustomTable(props: ICustomTableProps): JSX.Element {
             else setContextPosition(null)
         }
     }, [contextMenu, contextPosition, onClicked])
+    const onSortingClickedHandler = useCallback((columnName) => {
+        if (sortingColumn && columnName == sortingColumn.columnName) {
+            switch (sortingColumn.sortDirection) {
+                case 'down':
+                    setSortingColumn({...sortingColumn, sortDirection: 'up'})
+                    break
+                case 'up': 
+                    setSortingColumn({...sortingColumn, sortDirection: 'down'})
+                    break
+                default: break
+            }
+        }
+        else setSortingColumn({columnName, sortDirection: 'up'})
+    }, [sortingColumn])
+    const sortingData = useMemo(() => {
+        if (sortingColumn) return data.sort((a, b) => {
+            if (a[sortingColumn.columnName] && b[sortingColumn.columnName]) {
+                return sortingColumn.sortDirection == 'up' 
+                    ? a[sortingColumn.columnName]!.toString().localeCompare(b[sortingColumn.columnName]!.toString())
+                    : b[sortingColumn.columnName]!.toString().localeCompare(a[sortingColumn.columnName]!.toString())
+            }
+            else throw 'Невозможно отсортировать'
+        })
+        else return data
+    }, [data, sortingColumn])
     return (
     <div>
     <Table striped={striped ?? false} bordered hover className={style.tableMain} variant='dark'>
         <thead>
-            <tr>{ header.map((item, index) => <th key={`table-header#${index}`}>{item.name}</th>) }</tr>
+            <tr>{ header.map((item, index) => {
+                return (
+                    <th key={`table-header#${index}`}>
+                        <div className='d-flex justify-content-between align-items-center' style={{cursor: 'pointer'}} 
+                                onClick={() => onSortingClickedHandler(item.key)}>
+                            <span>{item.name}</span>
+                            { 
+                            sortingColumn && sortingColumn.columnName == item.key 
+                                ? <div className={`${style.sortingArrow} ${sortingColumn.sortDirection == 'up' ? style.sortingArrowIsToggled : null}`}></div> 
+                                : <></> 
+                            }
+                        </div>
+                    </th>
+                )
+            }) }</tr>
         </thead>
         <tbody key={uuidv4()}>
         {
-        data.map((item, index) => {
+        sortingData.map((item, index) => {
             const separatedStyle = separators && separators.some(it => it == index) && index != data.length - 1
                 ? { borderBottom: '3px solid darkorchid' } as CSSProperties
                 : { }

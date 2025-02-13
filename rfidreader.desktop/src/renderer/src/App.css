@@ -18,7 +18,7 @@ body {
   background: #323232;
   overflow-x: hidden;
   .page-content {
-    
+    overflow-y: auto;
     padding: 0px 0px 10px;
     flex-grow: 1;
     margin: 80px 0px 0px;
@@ -154,6 +154,13 @@ body {
       border-radius: 0px 0px 6px 6px;
     }
   }
+}
+.toast-header {
+  --bs-toast-header-bg: #282828;
+  color: white;
+}
+.toast {
+  --bs-toast-bg: #323232 !important;
 }
 .MuiTreeItem-content.Mui-selected {
   background-color: rgb(201 203 204 / 8%) !important;

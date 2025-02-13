@@ -1,0 +1,17 @@
+.notificationContainer {
+    bottom: 20px;
+    right: 20px;
+    position: fixed;
+    z-index: 10;
+    display: flex;
+    flex-flow: column;
+    gap: 10px;
+    cursor: default;
+}
+.notificationList {
+    display: flex;
+    flex-flow: column nowrap;
+    gap: 10px;
+    max-height: 400px;
+    overflow-y: auto;
+}

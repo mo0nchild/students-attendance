@@ -77,14 +77,16 @@ export async function excelReport(
     worksheet.getRow(2).alignment = { horizontal: 'center', vertical: 'middle', wrapText: true }
     
     worksheet.addRow([])
-    worksheet.getRow(8).height = 30
+    worksheet.getRow(students.length + 5).height = 30
     for(let i = 0; i < lessons.length + 1; i++) {
-        worksheet.getCell(8, i + 2).border = {
+        worksheet.getCell(students.length + 5, i + 2).border = {
             left: { style: 'thin', color: { argb: '000000' } },
-            right: { style: 'thin', color: { argb: '000000' } }
+            right: { style: 'thin', color: { argb: '000000' } },
+            bottom: { style: 'thin', color: { argb: '000000' } },
         }
+        worksheet.getCell(students.length + 5, i + 2).font = { size: 14, bold: true }
     }
-    const footer = worksheet.getRow(9)
+    const footer = worksheet.getRow(students.length + 5)
     footer.getCell(2).value = 'Статистика:'
     footer.getCell(2).border = {
         left: { style: 'thin', color: { argb: '000000' } },

@@ -3,7 +3,7 @@ import ModalWindow from "@components/modal/ModalWindow";
 import CustomTable, { DataType, HeaderType } from "@components/table/CustomTable";
 import { useScanner } from "@core/hooks/scanner";
 import { IGroupInfo } from "@core/models/group";
-import { INewStudent } from "@core/models/student";
+import { INewStudent, IStudentInfo } from "@core/models/student";
 import { getStudentsFromString, StudentFileData } from "@core/utils/fileSystem";
 import { groupService } from "@services/GroupService";
 import { studentService } from "@services/StudentService";
@@ -31,6 +31,7 @@ const tableHeader: HeaderType[] = [
         formatter: (value) => value == '' ? 'Не указано' : `${value}`
     }
 ]
+
 type ImportingTableInfo = StudentFileData & DataType & { rfid: string | null }
 export default function ImportingPage(): JSX.Element {
     const [ students, setStudents ] = useState<ImportingTableInfo[]>([])
@@ -41,6 +42,7 @@ export default function ImportingPage(): JSX.Element {
     const [ scanning, setScanning ] = useState<boolean>(false)
 
     const filePath = useLocation().state?.filePath as string | undefined
+    const { groupId } = useParams()
     useEffect(() => {
         if (!filePath) throw 'Не передан путь к файлу'
         console.log(filePath)
@@ -50,11 +52,20 @@ export default function ImportingPage(): JSX.Element {
         if (!currentFilePath) return
         (async() => {
             const text = await window.api.getFileData({path: currentFilePath})
-            const data = await getStudentsFromString(text)
+            let data = await getStudentsFromString(text)
             if (data.length <= 0) {
                 setCurrentFilePath(undefined)
                 alert('Импортированный список пуст')
                 return window.electron.ipcRenderer.send('focus-fix')
+            }
+            if (groupId) {
+                const currentStudents = (await studentService.getStudentsByGroup(parseInt(groupId))).data
+                data = data.filter(item => !currentStudents.some(it => studentsEquals(it, item)))
+                if (data.length <= 0) {
+                    alert('Все студенты из списка уже добавлены')
+                    window.electron.ipcRenderer.send('focus-fix')
+                    return navigate(-1)
+                }
             }
             setStudents(data.map((item, index) => ({ 
                 surname: item.surname,
@@ -78,7 +89,7 @@ export default function ImportingPage(): JSX.Element {
         }
     }, scanning)
     const navigate = useNavigate()
-    const { groupId } = useParams()
+
     useEffect(() => {
         groupService.getAllGroups()
             .then(({data}) => {
@@ -133,7 +144,7 @@ export default function ImportingPage(): JSX.Element {
         <Container fluid='sm'>
             <div style={pageHeaderStyle}>
                 <a style={headerLinkStyle} onClick={() => navigate(-1)}>&#8592;&nbsp;
-                    <span style={{textDecoration: 'underline', textUnderlineOffset: '5px'}}>Назад</span>
+                    <span style={{textDecoration: 'underline', textUnderlineOffset: '5px', cursor: 'pointer'}}>Назад</span>
                 </a>
                 <h2 style={{display: 'inline-block'}}>
                     Управление группой [{`${group?.faculty} ${group?.name}`}]
@@ -193,4 +204,9 @@ const scannerModalStyle: CSSProperties = {
     flexFlow: 'column nowrap',
     alignItems: 'center',
     gap: '10px'
+}
+function studentsEquals(student1: IStudentInfo, student2: StudentFileData): boolean {
+    const studentFIO1 = `${student1.surname} ${student1.name} ${student1.patronymic}`
+    const studentFIO2 = `${student2.surname} ${student2.name} ${student2.patronymic}`
+    return studentFIO1 == studentFIO2
 }

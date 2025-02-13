@@ -16,6 +16,10 @@ import { v4 as uuidv4 } from 'uuid'
 
 const tableHeader: HeaderType[] = [
     {
+        key: 'tableId',
+        name: '#'
+    },
+    {
         key: 'surname',
         name: 'Фамилия'
     },
@@ -41,15 +45,17 @@ interface StudentTableInfo extends DataType {
     name: string
     patronymic: string
     rfidCode: string
-    group: string
+    group: string,
+    tableId: string
 }
 const surnameRef = createRef<HTMLInputElement>()
 const nameRef = createRef<HTMLInputElement>()
 const patronymicRef = createRef<HTMLInputElement>()
 const updateCheckRef = createRef<HTMLInputElement>()
 
-function convertToTableInfo(info: IStudentInfo): StudentTableInfo {
+function convertToTableInfo(info: IStudentInfo, index: string): StudentTableInfo {
     return {
+        tableId: index,
         id: info.id,
         surname: info.surname,
         name: info.name,
@@ -70,15 +76,33 @@ export default function StudentPage(): JSX.Element {
     const [ updateUuid, setUpdateUuid ] = useState<string>(uuidv4())
     
     const previousPage = useLocation().state?.previousPage as string | undefined
-    console.log(previousPage)
     const navigate = useNavigate()
-    const { groupId, groupName } = useParams()
+    const { groupId, groupName, studentId } = useParams()
+
+    useEffect(() => {
+        if (!studentId || !groupId) return
+        (async () => {
+            const result = (await studentService.getStudentsByGroup(parseInt(groupId))).data
+            const student = result.find(item => item.id == parseInt(studentId))
+            if (student) {
+                surnameRef.current!.value = student.surname
+                nameRef.current!.value = student.name
+                patronymicRef.current!.value = student.patronymic
+                setRfidValue(student.rfidCode)
+                setSelectedGroup(student.group)
+                setSelected(convertToTableInfo(student, ''))
+                updateCheckRef.current!.checked = true
+            }
+        })().catch(error => console.log(error))
+    }, [studentId, groupId])
 
     useEffect(() => {
         if(!groupId) throw 'Группа не указана'
         studentService.getStudentsByGroup(parseInt(groupId))
             .then(response => {
-                setStudents(response.data.map(p => convertToTableInfo(p)))
+                setStudents(response.data
+                    .sort((a, b) => a.surname.localeCompare(b.surname))
+                    .map((p, i) => convertToTableInfo(p, (i + 1).toString())))
                 console.log(response.data)
                 setStatus('success') 
             })
@@ -131,7 +155,6 @@ export default function StudentPage(): JSX.Element {
                 alert('Запрос успешно выполнен')
                 window.electron.ipcRenderer.send('focus-fix')
                 setUpdateUuid(uuidv4())
-                clearInputForm()
             }
         }
         catch(error) {
@@ -182,7 +205,7 @@ export default function StudentPage(): JSX.Element {
                 if (previousPage) navigate(previousPage)
                 else navigate('/groups')
             }}>&#8592;&nbsp;
-                <span style={{textDecoration: 'underline', textUnderlineOffset: '5px'}}>Назад</span>
+                <span style={{textDecoration: 'underline', textUnderlineOffset: '5px', cursor: 'pointer'}}>Назад</span>
             </a>
             <h2 style={{display: 'inline-block'}}>Управление студентами [{groupName}]</h2>
         </div>
@@ -266,8 +289,11 @@ export default function StudentPage(): JSX.Element {
         <Row>
             <Processing status={status}>
                 <div style={studentTableStyle}>
+                    { students && students.length > 0
+                        ? <span>Количество студентов: {students!.length}</span> : <></> }
                     <CustomTable header={tableHeader} data={students!}
-                        onClicked={(data) => onSelectStudentHandler(data.id)}/>
+                        onClicked={(data) => onSelectStudentHandler(data.id)}
+                        defaultSort={{columnName: 'surname', sortDirection: 'up'}}/>
                 </div>
             </Processing>
         </Row>

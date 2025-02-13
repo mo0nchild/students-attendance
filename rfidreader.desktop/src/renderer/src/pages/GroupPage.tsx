@@ -2,7 +2,7 @@
 import Processing, { LoadingStatus } from "@components/processing/Processing"
 import { IGroupInfo } from "@core/models/group"
 import { AccordionList, AccordionListData } from "@renderer/components/accordionList/AccordionList"
-import { getStudentsFromString } from "@renderer/utils/fileSystem"
+import { getStudentsFromString, StudentFileData } from "@renderer/utils/fileSystem"
 import { groupBy } from "@renderer/utils/processing"
 import { groupService } from "@services/GroupService"
 import { studentService } from "@services/StudentService"
@@ -10,6 +10,8 @@ import { createRef, CSSProperties, useCallback, useEffect, useMemo, useState } f
 import { Button, Col, Container, Form, Row } from "react-bootstrap"
 import { useNavigate } from "react-router-dom"
 import { v4 as uuidv4 } from 'uuid'
+import { SearchStudents } from "./components/SearchStudents"
+import { IStudentInfo } from "@renderer/models/student"
 
 const groupNameRef = createRef<HTMLInputElement>()
 const facultyRef = createRef<HTMLInputElement>()
@@ -103,6 +105,12 @@ export default function GroupPage(): JSX.Element {
                 alert('Импортированный список пуст')
                 return  window.electron.ipcRenderer.send('focus-fix')
             }
+            const currentStudents = (await studentService.getStudentsByGroup(id)).data
+            const checkSize = data.filter(item => !currentStudents.some(it => studentsEquals(it, item)))
+            if (checkSize.length <= 0) {
+                alert('Все студенты из списка уже добавлены')
+                return window.electron.ipcRenderer.send('focus-fix')
+            }
             navigator(`/importing/${id}`, { state: { filePath } })
         }
     }, [navigator])
@@ -138,7 +146,7 @@ export default function GroupPage(): JSX.Element {
                 </Form.Group>   
             </Col>
         </Row>
-        <Row className='gy-2 gy-lg-3 gx-3 mb-5 justify-content-center'>
+        <Row className='gy-2 gy-lg-3 gx-3 mb-4 justify-content-center'>
             <Col sm={6} md={6} lg={4} style={{padding: 'none'}}>
                 <Button style={{width: '100%'}} onClick={onApplyGroupHandler}>
                     { selected == null ? 'Добавить' : 'Обновить' }
@@ -153,6 +161,11 @@ export default function GroupPage(): JSX.Element {
                         }
                     }}
                 />
+            </Col>
+        </Row>
+        <Row className='gy-2 gy-lg-3 gx-3 mb-4 justify-content-center'>
+            <Col sm={12} md={12} lg={8}>
+                <SearchStudents/>
             </Col>
         </Row>
         <Row className='justify-content-center flex-grow-1'>
@@ -176,16 +189,20 @@ export default function GroupPage(): JSX.Element {
                                 onClick: () => onRemoveGroupHandler(item)
                             },
                             (() => {
-                                const students = studentsInGroup.find(it => it.id == item.id)
-                                if (students && students.count <= 0) {
-                                    return {
-                                        name: 'Импортировать',
-                                        onClick: () => {
-                                            onImportingHander(item.id)
-                                        }
-                                    }
+                                // const students = studentsInGroup.find(it => it.id == item.id)
+                                // if (students && students.count <= 0) {
+                                //     return {
+                                //         name: 'Импортировать',
+                                //         onClick: () => {
+                                //             onImportingHander(item.id)
+                                //         }
+                                //     }
+                                // }
+                                // else return undefined
+                                return {
+                                    name: 'Импортировать',
+                                    onClick: () => onImportingHander(item.id)
                                 }
-                                else return undefined
                             })()
                         ]
                     }}
@@ -202,3 +219,9 @@ export default function GroupPage(): JSX.Element {
 const pageHeaderStyle: CSSProperties = {
     marginBottom: '14px',  
 }
+function studentsEquals(student1: IStudentInfo, student2: StudentFileData): boolean {
+    const studentFIO1 = `${student1.surname} ${student1.name} ${student1.patronymic}`
+    const studentFIO2 = `${student2.surname} ${student2.name} ${student2.patronymic}`
+    return studentFIO1 == studentFIO2
+}
+

@@ -39,7 +39,6 @@ data class UpdateStudent(
     @field:NotNull
     val groupId: Long
 )
-
 data class NewStudent(
     @field:Size(min=3, max=50)
     @field:NotNull
@@ -51,7 +50,7 @@ data class NewStudent(
     @field:NotEmpty
     val surname: String,
 
-    @field:Size(min =3, max=50)
+    @field:Size(min=3, max=50)
     @field:NotNull
     @field:NotEmpty
     val patronymic: String,
@@ -61,4 +60,8 @@ data class NewStudent(
     val rfidCode: String,
     @field:NotNull
     val groupId: Long
+)
+data class SearchStudentInfo(
+    val students: List<StudentDto>,
+    val group: GroupDto
 )

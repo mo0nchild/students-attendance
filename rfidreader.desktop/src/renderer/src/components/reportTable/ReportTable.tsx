@@ -141,11 +141,11 @@ export function ReportTable({
         </thead>
         <tbody>
         {
-        students.map((info, index) => {
+        students.sort((a, b) => a.studentFIO.localeCompare(b.studentFIO)).map((info, index) => {
             return (
             <tr key={`row#${index}`}>
                 <td style={{color: 'white'}}>{info.studentFIO}</td>
-                {info.checks.map((it, i) => (
+                { info.checks.map((it, i) => (
                     <td key={`row-cell#${i}`} style={{
                         textAlign: 'center',
                         cursor: 'pointer', 

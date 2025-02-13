@@ -3,11 +3,14 @@ package com.rfidreader.services.students
 import com.rfidreader.infrastructures.exceptions.ProcessException
 import com.rfidreader.infrastructures.repositories.GroupRepository
 import com.rfidreader.infrastructures.repositories.StudentRepository
+import com.rfidreader.services.groups.models.GroupMapper
 import com.rfidreader.services.students.models.NewStudent
+import com.rfidreader.services.students.models.SearchStudentInfo
 import com.rfidreader.services.students.models.StudentDto
 import com.rfidreader.services.students.models.StudentMapper
 import com.rfidreader.services.students.models.UpdateStudent
 import jakarta.validation.Validator
+import org.apache.poi.ss.format.CellFormatPart.group
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -18,6 +21,7 @@ class StudentServiceImpl(
     private val validator: Validator
 ) : StudentService {
     private val studentMapper = StudentMapper.INSTANCE
+    private val groupMapper = GroupMapper.INSTANCE
     @Autowired
     private lateinit var groupRepository: GroupRepository
 
@@ -51,8 +55,8 @@ class StudentServiceImpl(
         validator.validate(student).let {
             if(it.isNotEmpty()) throw ProcessException(it.first().message)
         }
-        studentRepository.getStudentsByRfidCode(student.rfidCode).let {
-            if(it.isNotEmpty()) throw ProcessException("RfidCode already exists: ${it[0]}")
+        studentRepository.getStudentsByRfidCode(student.rfidCode).let { if (it.isEmpty()) null else it.first() } ?.let {
+            if(it.id != student.id) throw ProcessException("RfidCode already exists: $it")
         }
         val entity = studentRepository.findById(student.id)
             .orElseThrow { ProcessException("Student not found") }
@@ -68,6 +72,27 @@ class StudentServiceImpl(
     }
     override fun getStudentsByGroupId(groupId: Long): List<StudentDto> {
         return studentRepository.getStudentByGroupId(groupId).map { studentMapper.toStudentDto(it) }
+    }
+    override fun getStudentByRfidCode(rfidCode: String): StudentDto {
+        return studentRepository.getStudentsByRfidCode(rfidCode).let {
+            if (it.isEmpty()) throw ProcessException("Student not found")
+            studentMapper.toStudentDto(it.first())
+        }
+    }
+    override fun findStudentByFio(fio: String): List<SearchStudentInfo> {
+        if (fio.length <= 3) throw ProcessException("FIO length should be more than 3 characters")
+        var results = mutableListOf<SearchStudentInfo>()
+        var students = studentRepository.getStudentsByFio(fio).groupBy { it.group?.id }
+        for ((key, studentList) in students) {
+            var group = groupRepository.findById(key!!).let {
+                if (it.isEmpty) null
+                else SearchStudentInfo(
+                    students=studentList.map(studentMapper::toStudentDto),
+                    group=groupMapper.toGroupDto(it.get()))
+            }
+            if (group != null) results.add(group)
+        }
+        return results
     }
     override fun getAllStudents(): List<StudentDto> {
         return studentRepository.findAll().map { studentMapper.toStudentDto(it) }
