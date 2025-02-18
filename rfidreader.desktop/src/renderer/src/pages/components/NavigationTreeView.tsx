@@ -25,7 +25,8 @@ export function NavigationTreeView({ onClick }: NavigationTreeViewProps): JSX.El
                 const lessonResponse = (await lessonService.getLessonsByDiscipline(item.id)).data
 
                 for (const lesson of lessonResponse) {
-                    for (const group of lesson.groups) {
+                    const sortedLesson = lesson.groups.sort((a, b) => a.name.localeCompare(b.name))
+                    for (const group of sortedLesson) {
                         if (!grouping[item.name].some(it => it.id == group.id)) {
                             grouping[item.name].push(group)
                         }
@@ -53,7 +54,7 @@ export function NavigationTreeView({ onClick }: NavigationTreeViewProps): JSX.El
                 return (
                 <TreeItem itemId={`group#${groupIndex}-discipline#${index}`} label={groupItem.name}
                     key={`group#${groupIndex}-discipline#${index}`}
-                    onClick={() => {
+                    onMouseDown={() => {
                         const dispciplineId = disciplines.current.find(it => it.name == item)
                         if (dispciplineId) onClick?.(dispciplineId.id, groupItem)
                     }}/>

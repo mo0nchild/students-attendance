@@ -5,7 +5,7 @@ import { IDisciplineInfo } from "@renderer/models/discipline"
 import { IGroupInfo } from "@renderer/models/group"
 import { excelReport } from "@renderer/utils/excelReport"
 import saveAs from "file-saver"
-import { useState, useEffect, CSSProperties } from "react"
+import { useState, useEffect, CSSProperties, useRef } from "react"
 import { Button } from "react-bootstrap"
 import { useLessonContext } from "../contexts/LessonContext"
 
@@ -33,20 +33,24 @@ export function GroupAttendance({
     useEffect(() => {
         if (attendances) setStatus('success')
     }, [attendances])
+    const prevDeps = useRef([undefined, undefined] as [IDisciplineInfo | undefined, IGroupInfo | null | undefined])
     useEffect(() => {
-        if(currentGroup) {
+        console.log(discipline)
+        console.log(currentGroup)
+        if(currentGroup && discipline && prevDeps.current[0] !== discipline && prevDeps.current[1] !== currentGroup) {
             setLessonSearchInfo({
                 disciplineId: discipline.id,
                 groupId: currentGroup.id 
             })
+            prevDeps.current = [discipline, currentGroup]
         }
-    }, [currentGroup, discipline])
-    if (!currentGroup) return <></>
+    }, [discipline, currentGroup])
+    if (!attendances?.group) return <></>
     return (
     <div>
         <div className='mb-3 d-flex align-items-center justify-content-between'>
             <h2 className='fs-4 m-0' style={groupLinkStyle} onClick={onGroupLinkClick}>
-                {`${currentGroup.faculty} ${currentGroup.name}`}
+                {`${attendances.group.faculty} ${attendances.group.name}`}
                 <span className='ms-2'>
                     <svg width="20" height="20" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                         <path fill="#FFFFFF" d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/>

@@ -58,6 +58,7 @@ export default function AttendancePage(): JSX.Element {
         };
     }, [breakpoint])
     useEffect(() => {
+        console.log(`disciplineId: ${disciplineId}, groupId: ${groupId}`)
         if(!disciplineId) throw 'Не указан ИД дисциплины';
         if(!groupId) throw 'Не указан ИД группы';
         (async() => {
@@ -96,6 +97,8 @@ export default function AttendancePage(): JSX.Element {
             activeElement.blur()
         }
         if (!scanning && rfidCodes.current.length > 0 && lessonId.current) {
+            console.log(`scanning: ${scanning}}`)
+            console.log(rfidCodes.current)
             attendanceService.addAttendances({
                 lessonId: lessonId.current,
                 rfidCodes: rfidCodes.current.map(item => {
@@ -104,6 +107,7 @@ export default function AttendancePage(): JSX.Element {
             })
                 .then(() => {
                     setUpdateUuid(uuidv4())
+                    notificationRef.current!.clear()
                     rfidCodes.current = []
                 })
                 .catch(error => {
@@ -111,6 +115,9 @@ export default function AttendancePage(): JSX.Element {
                     alert('Не удалось выполнить запрос')
                     window.electron.ipcRenderer.send('focus-fix')
                 })
+        }
+        else {
+            notificationRef.current!.clear()
         }
     }, [scanning])
     return (
@@ -133,7 +140,7 @@ export default function AttendancePage(): JSX.Element {
                     <><div className='mb-4'>
                     {(() => {
                         return currentGroup
-                            ? <GroupAttendance currentGroup={currentGroup} discipline={discipline!} 
+                            ? <GroupAttendance discipline={discipline!} currentGroup={currentGroup}
                                 onScanning={id => {
                                     lessonId.current = id
                                     setScanning(true)
@@ -189,16 +196,20 @@ function Switcher({children}: PropsWithChildren): JSX.Element {
     const lessonContext = useLessonContext()
     return lessonContext.selectedLessonId ? lessonComponent : schedulerComponent
 }
-interface RenderRightMenuProps { disciplineId: string | undefined }
+interface RenderRightMenuProps { 
+    disciplineId: string | undefined 
+    onSelect?: (disciplineId: number, group: IGroupInfo) => void
+}
 
-function RenderRightMenu({disciplineId}: RenderRightMenuProps): JSX.Element {
+function RenderRightMenu({disciplineId, ...props}: RenderRightMenuProps): JSX.Element {
     const { selectLesson } = useLessonContext()
     const navigate = useNavigate()
 
     const onChangeGroupHandler = useCallback((disciplineId: number, group: IGroupInfo) => {
         selectLesson(undefined)
         navigate(`/attendance/${disciplineId}/${group.id}`)
-    }, [selectLesson, navigate])
+        props.onSelect?.(disciplineId, group)
+    }, [selectLesson])
     return (
     <Container fluid >
         <Row className='gy-2 gy-lg-3 gx-3 mb-4 justify-content-center'>

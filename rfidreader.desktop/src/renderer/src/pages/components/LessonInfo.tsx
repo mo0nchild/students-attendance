@@ -99,7 +99,10 @@ export default function LessonInfo({group, disciplineId, onScanning}: LessonInfo
         </div>
         <DisplayLessonInfo {...{disciplineId, lessonId: selectedLessonId}}/>
         <Processing status={status}>
-            <CustomTable header={tableHeader} data={attendancesInfo} separators={[groupStudents]} tableMinSize={1}
+            <CustomTable header={tableHeader} data={attendancesInfo.sort((a, b) => {
+                return a.groupInfo.localeCompare(b.groupInfo) || a.studentFIO.localeCompare(b.studentFIO)
+            })} 
+                separators={[groupStudents]} tableMinSize={1}
                 contextMenu={[
                     {
                         name: 'Отметить студента',
